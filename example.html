@@ -12,14 +12,32 @@
       padding: 0;
     }
 
-    #wrapper {
+    img {
+      z-index: 1;
+    }
+
+    h1 {
+      color: white;
+      left: 0;
+      padding: 100px;
+      position: absolute;
+      top: 0;
+      font-family: Helvetica;
+      font-weight: 100;
+      z-index: 100;
+    }
+
+    #background {
       background-color: black;
+      position: relative;
+      overflow: hidden;
       height: 100vh;
       width: 100%;
     }
   </style>
   <body>
-    <div id="wrapper"></div>
+    <div id="background"></div>
+    <h1>Pic randomizer tool</h1>
   </body>
 
   <script src="/scripts/Picrandomizer.js"></script>
@@ -38,7 +56,7 @@
       "/etc/gallery/11.png",
     ];
 
-    let bgpics = new Picrandomizer(imgUrls, "wrapper");
+    let bgpics = new Picrandomizer(imgUrls, "background");
     bgpics.init();
   </script>
 </html>
