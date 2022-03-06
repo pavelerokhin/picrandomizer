@@ -3,6 +3,8 @@ class Picrandomizer {
     this.wrapper = document.getElementById(wrapperId);
     this.wrapperSize = this.getWrapperSize(this.wrapper);
 
+    this.setWrapperStyle();
+
     this.imgUrls = imgUrls;
     this.imgs = [];
 
@@ -15,15 +17,22 @@ class Picrandomizer {
 
       let imgSize = this.getImgNaturalSize(img);
       this.imgs.push({ img: img, imgSize: imgSize });
-
-      this.setImgStyle(this.imgs[i]);
     });
+
+    this.setImgsStyle();
   }
 
   init() {
     for (let i of this.imgs) {
       this.wrapper.appendChild(i.img);
     }
+
+    window.addEventListener("resize", this.handlerResize.bind(this));
+  }
+
+  handlerResize() {
+    this.wrapperSize = this.getWrapperSize(this.wrapper);
+    this.setImgsStyle();
   }
 
   getImgNaturalSize(img) {
@@ -76,6 +85,12 @@ class Picrandomizer {
 		user-select: none;
 		z-index: 0;
 	`;
+  }
+
+  setImgsStyle() {
+    for (let img of this.imgs) {
+      this.setImgStyle(img);
+    }
   }
 
   shuffleArray(array) {
