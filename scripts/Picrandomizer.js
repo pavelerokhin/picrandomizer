@@ -8,22 +8,15 @@ class Picrandomizer {
 
     this.shuffleArray(this.imgUrls);
 
-    for (let url of this.imgUrls) {
+    this.imgUrls.forEach((url, i) => {
       let img = document.createElement("img");
       img.src = url;
 
       let imgSize = this.getImgNaturalSize(img);
-      let randomPosition = this.getRandomPosition(imgSize);
-
-      img.style.cssText = `
-					left: ${randomPosition.left};
-					position: fixed;
-					top: ${randomPosition.top};
-					transform: rotate(${this.getRandomRotation()})
-				`;
-
       this.imgs.push({ img: img, imgSize: imgSize });
-    }
+
+      this.setImgStyle(this.imgs[i]);
+    });
   }
 
   init() {
@@ -62,6 +55,17 @@ class Picrandomizer {
 
   rnd(a, b) {
     return Math.floor(Math.random() * a) + b;
+  }
+
+  setImgStyle(imgSettings) {
+    let randomPosition = this.getRandomPosition(imgSettings.imgSize);
+
+    imgSettings.img.style.cssText = `
+		left: ${randomPosition.left};
+		position: fixed;
+		top: ${randomPosition.top};
+		transform: rotate(${this.getRandomRotation()})
+	`;
   }
 
   shuffleArray(array) {
