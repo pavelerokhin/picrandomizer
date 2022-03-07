@@ -1,5 +1,5 @@
 class Picrandomizer {
-  constructor(imgUrls, wrapperId) {
+  constructor(imgUrls, wrapperId, howManyPics = 0) {
     this.wrapper = document.getElementById(wrapperId);
     this.wrapperSize = this.getWrapperSize(this.wrapper);
 
@@ -9,6 +9,9 @@ class Picrandomizer {
     this.imgs = [];
 
     this.shuffleArray(this.imgUrls);
+    if (howManyPics != 0) {
+      this.imgUrls = this.imgUrls.slice(0, howManyPics);
+    }
 
     this.imgUrls.forEach((url, i) => {
       let img = document.createElement("img");
