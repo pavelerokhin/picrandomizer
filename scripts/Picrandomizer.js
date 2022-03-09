@@ -13,7 +13,7 @@ class Picrandomizer {
       this.imgUrls = this.imgUrls.slice(0, howManyPics);
     }
 
-    this.imgUrls.forEach((url, i) => {
+    this.imgUrls.forEach((url) => {
       let img = document.createElement("img");
       img.src = url;
       img.setAttribute("draggable", "false");
