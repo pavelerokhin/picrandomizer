@@ -1,11 +1,11 @@
 class Picrandomizer {
-  constructor(
+  constructor({
     containerId,
     imgUrls,
     howManyPics = -1,
-    repeptition = false,
-    rotation = true
-  ) {
+    repetition = false,
+    rotation = true,
+  }) {
     containerId = containerId.trim();
     if (howManyPics < 0) {
       howManyPics = imgUrls.length;
@@ -20,27 +20,27 @@ class Picrandomizer {
       console.info("no Picrandomizer's images urls have been set");
       return;
     }
-    if (howManyPics > imgUrls.length && !repeptition) {
+    if (howManyPics > imgUrls.length && !repetition) {
       console.info(
         `can't take ${howManyPics} from the pictures provided (${imgUrls.length} images) without repetition`
       );
       return;
     }
 
+    this.container = document.getElementById(containerId);
+    this.containerSize = this.getContainerSize(this.container);
     this.howManyPics = howManyPics;
     this.imgUrls = imgUrls;
     this.imgs = [];
     this.repetition = repetition;
     this.rotation = rotation;
-    this.wrapper = document.getElementById(wrapperId);
-    this.wrapperSize = this.getWrapperSize(this.wrapper);
 
-    this.setWrapperStyle();
+    this.setContainerStyle();
 
     if (this.repetition) {
       let tmpUrls = [];
       for (let i = 0; i < this.howManyPics; i++) {
-        tmpUrls.push(this.imgUrls[this.rnd(0, this.imgUrls.length)]);
+        tmpUrls.push(this.imgUrls[this.rnd(this.imgUrls.length, 0)]);
       }
       this.imgUrls = tmpUrls;
     } else {
@@ -48,6 +48,7 @@ class Picrandomizer {
       this.imgUrls = this.imgUrls.slice(0, howManyPics);
     }
 
+    debugger;
     this.imgUrls.forEach((url) => {
       let img = document.createElement("img");
       img.src = url;
@@ -62,14 +63,14 @@ class Picrandomizer {
 
   init() {
     for (let i of this.imgs) {
-      this.wrapper.appendChild(i.img);
+      this.container.appendChild(i.img);
     }
 
     window.addEventListener("resize", this.handlerResize.bind(this));
   }
 
   handlerResize() {
-    this.wrapperSize = this.getWrapperSize(this.wrapper);
+    this.containerSize = this.getContainerSize(this.container);
     this.setImgsStyle();
   }
 
@@ -81,9 +82,10 @@ class Picrandomizer {
   }
 
   getRandomPosition(imgSize) {
-    let left = this.rnd(this.wrapperSize.offsetWidth - imgSize.width, 0) + "px";
+    let left =
+      this.rnd(this.containerSize.offsetWidth - imgSize.width, 0) + "px";
     let top =
-      this.rnd(this.wrapperSize.offsetHeight - imgSize.height, 0) + "px";
+      this.rnd(this.containerSize.offsetHeight - imgSize.height, 0) + "px";
 
     return { left: left, top: top };
   }
@@ -92,12 +94,12 @@ class Picrandomizer {
     return this.rnd(364, 0) + "deg";
   }
 
-  getWrapperSize(wrapper) {
+  getContainerSize(container) {
     return {
-      clientWidth: wrapper.clientWidth,
-      clientHeight: wrapper.clientHeight,
-      offsetWidth: wrapper.offsetWidth,
-      offsetHeight: wrapper.offsetHeight,
+      clientWidth: container.clientWidth,
+      clientHeight: container.clientHeight,
+      offsetWidth: container.offsetWidth,
+      offsetHeight: container.offsetHeight,
     };
   }
 
@@ -105,8 +107,8 @@ class Picrandomizer {
     return Math.floor(Math.random() * a) + b;
   }
 
-  setWrapperStyle() {
-    this.wrapper.style.cssText = `
+  setContainerStyle() {
+    this.container.style.cssText = `
 		overflow: hidden;
 		position: relative;
 	`;
@@ -123,7 +125,6 @@ class Picrandomizer {
 		z-index: 0;
   `;
 
-    debugger;
     if (this.rotation) {
       imgSettings.img.style.transform = `rotate(${this.getRandomRotation()})`;
     }
