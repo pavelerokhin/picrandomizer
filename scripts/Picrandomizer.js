@@ -6,8 +6,12 @@ class Picrandomizer {
     repeptition = false,
     rotation = true
   ) {
-    // tests
     containerId = containerId.trim();
+    if (howManyPics < 0) {
+      howManyPics = imgUrls.length;
+    }
+
+    // tests
     if (containerId.length == 0) {
       console.info("no Picrandomizer's container has been set");
       return;
@@ -23,17 +27,24 @@ class Picrandomizer {
       return;
     }
 
+    this.howManyPics = howManyPics;
+    this.imgUrls = imgUrls;
+    this.imgs = [];
+    this.repetition = repetition;
+    this.rotation = rotation;
     this.wrapper = document.getElementById(wrapperId);
     this.wrapperSize = this.getWrapperSize(this.wrapper);
 
     this.setWrapperStyle();
 
-    this.imgUrls = imgUrls;
-    this.imgs = [];
-    this.rotation = rotation;
-
-    this.shuffleArray(this.imgUrls);
-    if (howManyPics > 0) {
+    if (this.repetition) {
+      let tmpUrls = [];
+      for (let i = 0; i < this.howManyPics; i++) {
+        tmpUrls.push(this.imgUrls[this.rnd(0, this.imgUrls.length)]);
+      }
+      this.imgUrls = tmpUrls;
+    } else {
+      this.shuffleArray(this.imgUrls);
       this.imgUrls = this.imgUrls.slice(0, howManyPics);
     }
 
