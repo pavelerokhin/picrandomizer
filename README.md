@@ -18,8 +18,8 @@ All the parameters have to be passed to the Picrandomizer's constructor. The nst
 
 Requested parameters:
 
-_ `imgUrls` - An array of strings. Urls for the images to show,
-_ `wrapperId` - String, an id in DOM of the container for `Picrandomizer`.
+* `imgUrls` - An array of strings. Urls for the images to show,
+*  `wrapperId` - String, an id in DOM of the container for `Picrandomizer`.
 
 Optional parameters:
 
