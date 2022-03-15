@@ -42,6 +42,10 @@
     #background2 {
       background-color: rgb(90, 90, 90);
     }
+
+    #background3 {
+      background-color: rgb(124, 124, 124);
+    }
   </style>
   <body>
     <section>
@@ -51,6 +55,10 @@
     <section>
       <div id="background2" class="background"></div>
       <h1>Pic randomizer tool. No rotation</h1>
+    </section>
+    <section>
+      <div id="background3" class="background"></div>
+      <h1>Pic randomizer tool. Repetition of 2 images</h1>
     </section>
   </body>
 
@@ -70,13 +78,32 @@
       "/etc/gallery/11.png",
     ];
 
-    let bgpics1 = new Picrandomizer(imgUrls, "background1", 4);
+    let imgUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
 
-    let bgpics2 = new Picrandomizer(imgUrls, "background2", 4, false);
+    let bgpics1 = new Picrandomizer({
+      containerId: "background1",
+      imgUrls: imgUrls,
+      howManyPics: 4,
+    });
+    let bgpics2 = new Picrandomizer({
+      containerId: "background2",
+      imgUrls: imgUrls,
+      howManyPics: 4,
+      rotation: false,
+    });
+
+    debugger;
+    let bgpics3 = new Picrandomizer({
+      containerId: "background3",
+      imgUrls: imgUrls2,
+      howManyPics: 10,
+      repetition: true,
+    });
 
     window.onload = () => {
       bgpics1.init();
       bgpics2.init();
+      bgpics3.init();
     };
   </script>
 </html>
