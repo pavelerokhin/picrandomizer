@@ -1,5 +1,28 @@
 class Picrandomizer {
-  constructor(imgUrls, wrapperId, howManyPics = 0, rotation = true) {
+  constructor(
+    containerId,
+    imgUrls,
+    howManyPics = -1,
+    repeptition = false,
+    rotation = true
+  ) {
+    // tests
+    containerId = containerId.trim();
+    if (containerId.length == 0) {
+      console.info("no Picrandomizer's container has been set");
+      return;
+    }
+    if (imgUrls.length == 0) {
+      console.info("no Picrandomizer's images urls have been set");
+      return;
+    }
+    if (howManyPics > imgUrls.length && !repeptition) {
+      console.info(
+        `can't take ${howManyPics} from the pictures provided (${imgUrls.length} images) without repetition`
+      );
+      return;
+    }
+
     this.wrapper = document.getElementById(wrapperId);
     this.wrapperSize = this.getWrapperSize(this.wrapper);
 
@@ -10,7 +33,7 @@ class Picrandomizer {
     this.rotation = rotation;
 
     this.shuffleArray(this.imgUrls);
-    if (howManyPics != 0) {
+    if (howManyPics > 0) {
       this.imgUrls = this.imgUrls.slice(0, howManyPics);
     }
 
