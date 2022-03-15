@@ -1,5 +1,5 @@
 class Picrandomizer {
-  constructor(imgUrls, wrapperId, howManyPics = 0) {
+  constructor(imgUrls, wrapperId, howManyPics = 0, rotation = true) {
     this.wrapper = document.getElementById(wrapperId);
     this.wrapperSize = this.getWrapperSize(this.wrapper);
 
@@ -7,6 +7,7 @@ class Picrandomizer {
 
     this.imgUrls = imgUrls;
     this.imgs = [];
+    this.rotation = rotation;
 
     this.shuffleArray(this.imgUrls);
     if (howManyPics != 0) {
@@ -84,10 +85,14 @@ class Picrandomizer {
 		left: ${randomPosition.left};
 		position: absolute;
 		top: ${randomPosition.top};
-		transform: rotate(${this.getRandomRotation()});
 		user-select: none;
 		z-index: 0;
-	`;
+  `;
+
+    debugger;
+    if (this.rotation) {
+      imgSettings.img.style.transform = `rotate(${this.getRandomRotation()})`;
+    }
   }
 
   setImgsStyle() {
