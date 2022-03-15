@@ -11,19 +11,24 @@ class Picrandomizer {
       howManyPics = imgUrls.length;
     }
 
+    this.errorState = false;
+
     // tests
     if (containerId.length == 0) {
-      console.info("no Picrandomizer's container has been set");
+      console.error("no Picrandomizer's container has been set");
+      this.errorState = true;
       return;
     }
     if (imgUrls.length == 0) {
-      console.info("no Picrandomizer's images urls have been set");
+      console.error("no Picrandomizer's images urls have been set");
+      this.errorState = true;
       return;
     }
     if (howManyPics > imgUrls.length && !repetition) {
-      console.info(
+      console.error(
         `can't take ${howManyPics} from the pictures provided (${imgUrls.length} images) without repetition`
       );
+      this.errorState = true;
       return;
     }
 
@@ -62,11 +67,17 @@ class Picrandomizer {
   }
 
   init() {
-    for (let i of this.imgs) {
-      this.container.appendChild(i.img);
-    }
+    if (!this.errorState) {
+      for (let i of this.imgs) {
+        this.container.appendChild(i.img);
+      }
 
-    window.addEventListener("resize", this.handlerResize.bind(this));
+      window.addEventListener("resize", this.handlerResize.bind(this));
+    } else {
+      console.error(
+        "Due to the errors, it's impossible to initialize Picrandomizer"
+      );
+    }
   }
 
   handlerResize() {
