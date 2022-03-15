@@ -23,15 +23,16 @@
       z-index: 100;
     }
 
-    section {
+    .background {
       background-color: black;
       position: relative;
       height: 80vh;
       width: 100%;
     }
 
-    .background {
-      height: 100%;
+    .background.long {
+      position: relative;
+      height: 180vh;
       width: 100%;
     }
 
@@ -46,19 +47,27 @@
     #background3 {
       background-color: rgb(124, 124, 124);
     }
+
+    #background4 {
+      background-color: rgb(176, 176, 176);
+    }
+    #background4 h1 {
+      color: black;
+    }
   </style>
   <body>
-    <section>
-      <div id="background1" class="background"></div>
+    <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation</h1>
     </section>
-    <section>
-      <div id="background2" class="background"></div>
+    <section id="background2" class="background">
+      <div></div>
       <h1>Pic randomizer tool. No rotation</h1>
     </section>
-    <section>
-      <div id="background3" class="background"></div>
+    <section id="background3" class="background">
       <h1>Pic randomizer tool. Repetition of 2 images</h1>
+    </section>
+    <section id="background4" class="background long">
+      <h1>Pic randomizer tool. Long screen</h1>
     </section>
   </body>
 
@@ -92,7 +101,6 @@
       rotation: false,
     });
 
-    debugger;
     let bgpics3 = new Picrandomizer({
       containerId: "background3",
       imgUrls: imgUrls2,
@@ -100,10 +108,18 @@
       repetition: true,
     });
 
+    let bgpics4 = new Picrandomizer({
+      containerId: "background4",
+      imgUrls: imgUrls,
+      howManyPics: 50,
+      repetition: true,
+    });
+
     window.onload = () => {
       bgpics1.init();
       bgpics2.init();
       bgpics3.init();
+      bgpics4.init();
     };
   </script>
 </html>

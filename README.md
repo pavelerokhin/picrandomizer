@@ -18,12 +18,13 @@ All the parameters have to be passed to the Picrandomizer's constructor. The nst
 
 Requested parameters:
 
-* `imgUrls` - An array of strings. Urls for the images to show,
-*  `wrapperId` - String, an id in DOM of the container for `Picrandomizer`.
+- `containerId` - String, an id in DOM of the container for `Picrandomizer`.
+- `imgUrls` - An array of strings. Urls for the images to show,
 
 Optional parameters:
 
 - `howManyPics` - Number, how many images from `imgUrls` will be shown at a time. Default: `-1` (all the images),
+- `repetition` - Boolean, if the images provided to Picrandomizer can be repeated. Default: `false`,
 - `rotation` Boolean parameter, if true the images will be rotated randomly. Default: `true`.
 
 ## Usage
