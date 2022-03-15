@@ -47,9 +47,9 @@ E.g.:
 				rotation: false
       });
 
-			windod.onload = () => {
+      windod.onload = () => {
       	background.init();
-			}
+      }
   </script>
 </body>
 ```
