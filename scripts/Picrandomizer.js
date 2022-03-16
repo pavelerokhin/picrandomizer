@@ -2,6 +2,7 @@ class Picrandomizer {
   constructor({
     containerId,
     imgUrls,
+    dontTouch = false,
     howManyPics = -1,
     repetition = false,
     rotation = true,
@@ -12,6 +13,12 @@ class Picrandomizer {
     }
 
     this.errorState = false;
+    this.randomizerAllowedStates = [
+      { repetition: false, rotation: false },
+      { repetition: true, rotation: false },
+      { repetition: false, rotation: true },
+      { repetition: true, rotation: true },
+    ];
 
     // tests
     if (containerId.length == 0) {
@@ -34,6 +41,7 @@ class Picrandomizer {
 
     this.container = document.getElementById(containerId);
     this.containerSize = this.getContainerSize(this.container);
+    this.dontTouch = dontTouch;
     this.howManyPics = howManyPics;
     this.imgUrls = imgUrls;
     this.imgs = [];
@@ -53,7 +61,6 @@ class Picrandomizer {
       this.imgUrls = this.imgUrls.slice(0, howManyPics);
     }
 
-    debugger;
     this.imgUrls.forEach((url) => {
       let img = document.createElement("img");
       img.src = url;
@@ -80,17 +87,44 @@ class Picrandomizer {
     }
   }
 
+  elqideanDistance(x1, x2, y1, y2) {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+  }
+
   handlerResize() {
     this.containerSize = this.getContainerSize(this.container);
     this.setImgsStyle();
   }
 
   getImgNaturalSize(img) {
+    let coordinates = {
+      x1: img.left,
+      y1: img.top,
+      x2: img.left + img.naturalWidth,
+      y2: img.top + img.naturalHeight,
+    };
+    let radius =
+      elqideanDistance(
+        coordinates.x1,
+        coordinates.x2,
+        coordinates.y1,
+        coordinates.y2
+      ) / 2;
+    let center = {
+      x0: coordinates.x1 + radius,
+      y0: coordinates.y1 + radius,
+    };
+
     return {
+      center: center,
+      coordinates: coordinates,
       height: img.naturalHeight,
+      radius: radius,
       width: img.naturalWidth,
     };
   }
+
+  getRandomDontTouchPosition(imgSize) {}
 
   getRandomPosition(imgSize) {
     let left =

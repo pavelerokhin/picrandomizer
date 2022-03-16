@@ -55,9 +55,33 @@
       color: black;
       text-shadow: 0 1px 0 white;
     }
+
+    #background5 {
+      background-color: rgb(203, 203, 203);
+      float: left;
+      height: 50vh;
+      width: 40%;
+    }
+
+    #background5 h1 {
+      color: rgb(107, 107, 107);
+      text-shadow: 1px 1px 1px rgb(255, 0, 0);
+    }
+
+    #background6 {
+      background-color: rgb(234, 232, 232);
+      float: right;
+      height: 50vh;
+      width: 60%;
+    }
+
+    #background6 h1 {
+      color: rgb(107, 107, 107);
+      text-shadow: 1px 1px 1px rgb(255, 0, 0);
+    }
   </style>
   <body>
-    <section id="background1" class="background">
+    <!-- <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation</h1>
     </section>
     <section id="background2" class="background">
@@ -69,6 +93,12 @@
     </section>
     <section id="background4" class="background long">
       <h1>Pic randomizer tool. Long screen</h1>
+    </section> -->
+    <section id="background5" class="background long">
+      <h1>Pic randomizer tool. All images inside the container</h1>
+    </section>
+    <section id="background6" class="background long">
+      <h1>Pic randomizer tool. Container covered by images</h1>
     </section>
   </body>
 
@@ -90,37 +120,57 @@
 
     let imgUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
 
-    let bgpics1 = new Picrandomizer({
-      containerId: "background1",
-      imgUrls: imgUrls,
-      howManyPics: 4,
-    });
-    let bgpics2 = new Picrandomizer({
-      containerId: "background2",
-      imgUrls: imgUrls,
-      howManyPics: 4,
-      rotation: false,
-    });
+    let imgUrls3 = ["/etc/gallery/6.png", "/etc/gallery/3.png"];
 
-    let bgpics3 = new Picrandomizer({
-      containerId: "background3",
-      imgUrls: imgUrls2,
+    let imgUrls4 = ["/etc/gallery/8.png"];
+
+    // let bgpics1 = new Picrandomizer({
+    //   containerId: "background1",
+    //   imgUrls: imgUrls,
+    //   howManyPics: 4,
+    // });
+    // let bgpics2 = new Picrandomizer({
+    //   containerId: "background2",
+    //   imgUrls: imgUrls,
+    //   howManyPics: 4,
+    //   rotation: false,
+    // });
+
+    // let bgpics3 = new Picrandomizer({
+    //   containerId: "background3",
+    //   imgUrls: imgUrls2,
+    //   howManyPics: 10,
+    //   repetition: true,
+    // });
+
+    // let bgpics4 = new Picrandomizer({
+    //   containerId: "background4",
+    //   imgUrls: imgUrls,
+    //   howManyPics: 50,
+    //   repetition: true,
+    // });
+
+    let bgpics5 = new Picrandomizer({
+      containerId: "background5",
+      imgUrls: imgUrls3,
       howManyPics: 10,
       repetition: true,
     });
 
-    let bgpics4 = new Picrandomizer({
-      containerId: "background4",
-      imgUrls: imgUrls,
-      howManyPics: 50,
-      repetition: true,
-    });
+    // let bgpics6 = new Picrandomizer({
+    //   containerId: "background6",
+    //   imgUrls: imgUrls4,
+    //   howManyPics: 10,
+    //   repetition: true,
+    // });
 
     window.onload = () => {
-      bgpics1.init();
-      bgpics2.init();
-      bgpics3.init();
-      bgpics4.init();
+      // bgpics1.init();
+      // bgpics2.init();
+      // bgpics3.init();
+      // bgpics4.init();
+      bgpics5.init();
+      // bgpics6.init();
     };
   </script>
 </html>
