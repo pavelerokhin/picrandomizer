@@ -13,16 +13,6 @@ class Picrandomizer {
     }
 
     this.errorState = false;
-    // this.randomizerAllowedStates = [
-    //   { repetition: false, rotation: false, dontTouch: false },
-    //   { repetition: true, rotation: false, dontTouch: false },
-    //   { repetition: false, rotation: true, dontTouch: false },
-    //   { repetition: true, rotation: true, dontTouch: false },
-    //   { repetition: false, rotation: false, dontTouch: true },
-    //   { repetition: true, rotation: false, dontTouch: true },
-    //   { repetition: false, rotation: true, dontTouch: true },
-    //   { repetition: true, rotation: true, dontTouch: true },
-    // ];
 
     // tests
     if (containerId.length == 0) {
@@ -70,26 +60,24 @@ class Picrandomizer {
       img.src = url;
       img.setAttribute("draggable", "false");
 
-      let imgConfig;
-      if (this.dontTouch) {
-        imgConfig = this.getImgDontTouchConfig(img);
-      } else {
-        imgConfig = this.getImgNaturalConfig(img);
-      }
       this.imgs.push({
         imgItself: img,
-        imgConfig: imgConfig,
+        imgConfig: this.getImgConfig(),
         isVisible: true,
       });
     });
-
-    this.setImgsStyle();
   }
 
   init() {
     if (!this.errorState) {
-      for (let i of this.imgs) {
-        this.container.appendChild(i.img);
+      for (let img of this.imgs) {
+        debugger;
+        if (this.dontTouch) {
+          this.setRandomDontTouchPosition(img.imgConfig);
+        } else {
+        }
+        this.setImgStyle(img);
+        this.container.appendChild(img.imgItself);
       }
       window.addEventListener("resize", this.handlerResize.bind(this));
     } else {
@@ -99,40 +87,12 @@ class Picrandomizer {
     }
   }
 
-  initImgDontTouchConfig(img) {
-    let coordinates = {
-      x1: undefined,
-      y1: undefined,
-      x2: undefined,
-      y2: undefined,
-    };
-    let radius = Math.max(img.naturalHeight / 2, img.naturalWidth / 2);
-    let center = {
-      x0: undefined, // will be x1 + radius when ricalulated
-      y0: undefined, // will be y1 + radius when ricalulated
-    };
-
-    return {
-      center: center,
-      coordinates: coordinates,
-      height: img.naturalHeight,
-      radius: radius,
-      width: img.naturalWidth,
-    };
-  }
-
   dontTouchCriteria(imgConfig) {
+    debugger;
     let touch = false;
     for (let otherImg of this.imgs) {
-      if (otherImg.imgConfig.coordinates.x0) {
-        touch =
-          elqideanDistance(
-            otherImg.imgConfig.center.x0,
-            imgConfig.center.x0,
-            otherImg.imgConfig.center.y0,
-            mgConfig.center.y0
-          ) <
-          otherImg.imgConfig.radius + imgConfig.radius;
+      if (otherImg.imgConfig.corners[0].x) {
+        touch = this.collision(imgConfig, otherImg.imgConfig);
         if (touch) {
           break;
         }
@@ -141,48 +101,21 @@ class Picrandomizer {
     return touch;
   }
 
-  elqideanDistance(x1, x2, y1, y2) {
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-  }
-
+  // TODO: remake
   handlerResize() {
     this.containerSize = this.getContainerSize(this.container);
     this.setImgsStyle();
   }
 
-  getImgNaturalConfig(img) {
+  getImgConfig() {
     return {
-      height: img.naturalHeight,
-      width: img.naturalWidth,
+      center: { x: undefined, y: undefined },
+      corners: [],
+      height: undefined,
+      radius: undefined,
+      rotation: undefined,
+      width: undefined,
     };
-  }
-
-  getRandomDontTouchPosition(imgConfig) {
-    let tryCount = 0;
-    let randomPosition = this.getRandomPosition(img.imgConfig);
-
-    while (!this.dontTouchCriteria(imgConfig) || tryCount < 10) {
-      randomPosition = this.getRandomPosition(img.imgConfig);
-      img.imgConfig.coordinates.x1 = randomPosition.left;
-      img.imgConfig.coordinates.y1 = randomPosition.top;
-      img.imgConfig.coordinates.x2 = randomPosition.left + img.imgConfig.width;
-      img.imgConfig.coordinates.y2 = randomPosition.top + img.imgConfig.height;
-      img.imgConfig.center.x0 =
-        img.imgConfig.coordinates.x1 + img.imgConfig.radius;
-      img.imgConfig.center.y0 =
-        img.imgConfig.coordinates.y1 + img.imgConfig.radius;
-
-      tryCount++;
-    }
-    if (tryCount >= 10) {
-      img.isVisible = false;
-      img.imgConfig.coordinates.x1 = undefined;
-      img.imgConfig.coordinates.y1 = undefined;
-      img.imgConfig.coordinates.x2 = undefined;
-      img.imgConfig.coordinates.y2 = undefined;
-      img.imgConfig.center.x0 = undefined;
-      img.imgConfig.center.y0 = undefined;
-    }
   }
 
   getRandomPosition(imgConfig) {
@@ -193,7 +126,7 @@ class Picrandomizer {
   }
 
   getRandomRotation() {
-    return this.rnd(364, 0) + "deg";
+    return this.rnd(364, 0);
   }
 
   getContainerSize(container) {
@@ -216,37 +149,203 @@ class Picrandomizer {
 	`;
   }
 
-  setCoordinates(imgConfig, newCoordinates) {
-    imgConfig.coordinates.x1 = newCoordinates.left;
-    imgConfig.coordinates.y1 = newCoordinates.top;
-    imgConfig.coordinates.x2 = newCoordinates.left + imgConfig.width;
-    imgConfig.coordinates.y2 = newCoordinates.left + imgConfig.height;
-
-    imgConfig.center.x0 = imgConfig.coordinates.x1 + imgConfig.radius;
-    imgConfig.center.y0 = imgConfig.coordinates.y1 + imgConfig.radius;
-  }
-
   setImgStyle(img) {
     if (img.isVisible) {
-      let randomPosition = this.getRandomPosition(img.imgConfig);
-
       img.imgItself.style.cssText = `
-      left: ${randomPosition.left}px;
+      left: ${img.imgConfig.corners[0].x}px;
       position: absolute;
-      top: ${randomPosition.top}px;
+      top: ${img.imgConfig.corners[0].y}px;
       user-select: none;
       z-index: 0;
     `;
 
       if (this.rotation) {
-        img.imgItself.style.transform = `rotate(${this.getRandomRotation()})`;
+        img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
       }
     }
   }
 
-  setImgsStyle() {
-    for (let img of this.imgs) {
-      this.setImgStyle(img);
+  setProjections(imgConfig) {
+    debugger;
+
+    let center_x = imgConfig.center.x;
+    let center_y = imgConfig.center.y;
+    let angle = imgConfig.rotation ? imgConfig1.rotation : 0;
+    let corners = imgConfig.corners;
+
+    // Genere start Min-Max projection on center of Square
+    let projections = {
+      x: {
+        min: null,
+        max: null,
+        distance: null,
+      },
+      y: {
+        min: null,
+        max: null,
+        distance: null,
+      },
+    };
+
+    for (let corner of corners) {
+      let projection_x = {},
+        projection_y = {};
+
+      /**
+       * Global calculation for projection X and Y
+       */
+
+      // Angle 0:horizontale (center > left) 90:verticatale (center > top)
+      var angle90 = -(angle % 90);
+
+      //Distance :
+      var distance_corner_center = Math.floor(
+        Math.sqrt(
+          (center_x - corner.x) * (center_x - corner.x) +
+            (center_y - corner.y) * (center_y - corner.y)
+        )
+      );
+
+      // Angle between segment [center-corner] and real axe X (not square axe), must be negative (radius are negative clockwise)
+      var angle_with_axeX = -Math.floor(
+        Math.degrees(Math.atan((corner.y - center_y) / (corner.x - center_x)))
+      ); // Tan(alpha) = opposé (ecart sur Y) / adjacent (ecart sur X)
+      // If angle is ]0;90[, he is on the 2em et 4th quart of rotation
+      if (angle_with_axeX > 0) {
+        angle_with_axeX -= 180;
+      }
+      // If corner as upper (so with less pixel on y) thant center, he is on 3th or 4th quart of rotation
+      if (
+        corner.y < center_y ||
+        (corner.y == center_y && corner.x < center_x)
+      ) {
+        angle_with_axeX -= 180;
+      }
+
+      // Calculate difference between 2 angles to know the angle between [center-corner] and Square axe X
+      var delta_angle = angle_with_axeX - angle90;
+      // If angle is on ]-180;-360], corner are upper than Square axe X, so set a positive angle on [0;180]
+      if (delta_angle < -180) {
+        delta_angle += 360;
+      }
+
+      /**
+       * Projection on X
+       */
+
+      // Calculate distance between center and projection on axe X
+      var distance_center_projection_x = Math.floor(
+        distance_corner_center * Math.cos(Math.radians(delta_angle))
+      );
+
+      // Create projection
+      projection_x.x = Math.floor(
+        center_x +
+          distance_center_projection_x * Math.cos(Math.radians(-angle90))
+      );
+      projection_x.y = Math.floor(
+        center_y +
+          distance_center_projection_x * Math.sin(Math.radians(-angle90))
+      );
+
+      // If is the min ?
+      if (
+        projections.x.min == null ||
+        distance_center_projection_x < projections.x.min.distance
+      ) {
+        projections.x.min = projection_x;
+        projections.x.min.distance = distance_center_projection_x;
+        projections.x.min.corner = corner;
+      }
+      // Is the max ?
+      if (
+        projections.x.max == null ||
+        distance_center_projection_x > projections.x.max.distance
+      ) {
+        projections.x.max = projection_x;
+        projections.x.max.distance = distance_center_projection_x;
+        projections.x.max.corner = corner;
+      }
+
+      /**
+       * Projection on Y
+       */
+
+      // Calculate distance between center and projection on axe Y
+      var distance_center_projection_y = Math.floor(
+        distance_corner_center * Math.cos(Math.radians(delta_angle - 90))
+      );
+
+      // Create projection
+      projection_y.x = Math.floor(
+        center_x +
+          distance_center_projection_y * Math.cos(Math.radians(-angle90 - 90))
+      );
+      projection_y.y = Math.floor(
+        center_y +
+          distance_center_projection_y * Math.sin(Math.radians(-angle90 - 90))
+      );
+
+      // If is the min ?
+      if (
+        projections.y.min == null ||
+        distance_center_projection_y < projections.y.min.distance
+      ) {
+        projections.y.min = projection_y;
+        projections.y.min.distance = distance_center_projection_y;
+        projections.y.min.corner = corner;
+      }
+      // Is the max ?
+      if (
+        projections.y.max == null ||
+        distance_center_projection_y > projections.y.max.distance
+      ) {
+        projections.y.max = projection_y;
+        projections.y.max.distance = distance_center_projection_y;
+        projections.y.max.corner = corner;
+      }
+    }
+
+    imgConfig.projections = projections;
+  }
+
+  setPosition(imgConfig, randomPosition) {
+    debugger;
+
+    imgConfig.corners.push({ x: randomPosition.left, y: randomPosition.top });
+    imgConfig.corners.push({
+      x: randomPosition.left + imgConfig.width,
+      y: randomPosition.top,
+    });
+    imgConfig.corners.push({
+      x: randomPosition.left + imgConfig.width,
+      y: randomPosition.top + imgConfig.height,
+    });
+    imgConfig.corners.push({
+      x: randomPosition.left,
+      y: randomPosition.top + imgConfig.height,
+    });
+    if (this.rotation) {
+      imgConfig.rotation = this.getRandomRotation();
+    }
+  }
+
+  setRandomDontTouchPosition(imgConfig) {
+    let tryCount = 0;
+    let randomPosition = this.getRandomPosition(imgConfig);
+    this.setPosition(imgConfig, randomPosition);
+    this.setProjections(imgConfig);
+
+    while (!this.dontTouchCriteria(imgConfig) || tryCount < 10) {
+      let randomPosition = this.getRandomPosition(imgConfig);
+      this.setPosition(imgConfig, randomPosition);
+      this.setProjections(imgConfig);
+      tryCount++;
+    }
+    if (tryCount >= 10) {
+      img.isVisible = false;
+      img.imgConfig.corners = [];
+      img.imgConfig.rotation = undefined;
     }
   }
 
@@ -257,5 +356,57 @@ class Picrandomizer {
       array[i] = array[j];
       array[j] = temp;
     }
+  }
+
+  // collision utils
+  collision(imgConfig1, imgConfig2) {
+    debugger;
+
+    imgConfig1.projections.x.is_collide =
+      (imgConfig1.projections.x.min.distance <= -imgConfig2.width / 2 &&
+        imgConfig1.projections.x.max.distance >= -mgConfig2.width / 2) ||
+      (imgConfig1.projections.x.min.distance <= imgConfig2.width / 2 &&
+        imgConfig1.projections.x.max.distance >= imgConfig2.width / 2) ||
+      (imgConfig1.projections.x.min.distance >= -imgConfig2.width / 2 &&
+        imgConfig1.projections.x.max.distance <= imgConfig2.width / 2)
+        ? true
+        : false;
+
+    imgConfig1.projections.y.is_collide =
+      (imgConfig1.projections.y.min.distance <= -imgConfig2.height / 2 &&
+        imgConfig1.projections.y.max.distance >= -imgConfig2.height / 2) ||
+      (imgConfig1.projections.y.min.distance <= imgConfig2.height / 2 &&
+        imgConfig1.projections.y.max.distance >= imgConfig2.height / 2) ||
+      (imgConfig1.projections.y.min.distance >= -imgConfig2.height / 2 &&
+        imgConfig1.fixed_projections.y.max.distance <= imgConfig2.height / 2)
+        ? true
+        : false;
+
+    imgConfig2.projections.x.is_collide =
+      (imgConfig2.projections.x.min.distance <= -imgConfig1.width / 2 &&
+        imgConfig2.projections.x.max.distance >= -imgConfig1.width / 2) ||
+      (imgConfig2.projections.x.min.distance <= imgConfig1.width / 2 &&
+        imgConfig2.projections.x.max.distance >= imgConfig1.width / 2) ||
+      (imgConfig2.projections.x.min.distance >= -imgConfig1.width / 2 &&
+        imgConfig2.projections.x.max.distance <= imgConfig1.width / 2)
+        ? true
+        : false;
+
+    imgConfig2.projections.y.is_collide =
+      (imgConfig2.projections.y.min.distance <= -imgConfig1.height / 2 &&
+        imgConfig2.projections.y.max.distance >= -imgConfig1.height / 2) ||
+      (imgConfig2.projections.y.min.distance <= imgConfig1.height / 2 &&
+        collide.cursor_projections.y.max.distance >= imgConfig1.height / 2) ||
+      (imgConfig2.projections.y.min.distance >= -imgConfig1.height / 2 &&
+        collide.cursor_projections.y.max.distance <= imgConfig1.height / 2)
+        ? true
+        : false;
+
+    return imgConfig1.projections.x.is_collide &&
+      imgConfig1.projections.y.is_collide &&
+      imgConfig2.projections.x.is_collide &&
+      imgConfig2.projections.y.is_collide
+      ? true
+      : false;
   }
 }
