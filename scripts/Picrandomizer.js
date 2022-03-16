@@ -13,12 +13,16 @@ class Picrandomizer {
     }
 
     this.errorState = false;
-    this.randomizerAllowedStates = [
-      { repetition: false, rotation: false },
-      { repetition: true, rotation: false },
-      { repetition: false, rotation: true },
-      { repetition: true, rotation: true },
-    ];
+    // this.randomizerAllowedStates = [
+    //   { repetition: false, rotation: false, dontTouch: false },
+    //   { repetition: true, rotation: false, dontTouch: false },
+    //   { repetition: false, rotation: true, dontTouch: false },
+    //   { repetition: true, rotation: true, dontTouch: false },
+    //   { repetition: false, rotation: false, dontTouch: true },
+    //   { repetition: true, rotation: false, dontTouch: true },
+    //   { repetition: false, rotation: true, dontTouch: true },
+    //   { repetition: true, rotation: true, dontTouch: true },
+    // ];
 
     // tests
     if (containerId.length == 0) {
@@ -66,8 +70,17 @@ class Picrandomizer {
       img.src = url;
       img.setAttribute("draggable", "false");
 
-      let imgSize = this.getImgNaturalSize(img);
-      this.imgs.push({ img: img, imgSize: imgSize });
+      let imgConfig;
+      if (this.dontTouch) {
+        imgConfig = this.getImgDontTouchConfig(img);
+      } else {
+        imgConfig = this.getImgNaturalConfig(img);
+      }
+      this.imgs.push({
+        imgItself: img,
+        imgConfig: imgConfig,
+        isVisible: true,
+      });
     });
 
     this.setImgsStyle();
@@ -78,41 +91,25 @@ class Picrandomizer {
       for (let i of this.imgs) {
         this.container.appendChild(i.img);
       }
-
       window.addEventListener("resize", this.handlerResize.bind(this));
     } else {
       console.error(
-        "Due to the errors, it's impossible to initialize Picrandomizer"
+        "Due to errors, it's impossible to initialize Picrandomizer"
       );
     }
   }
 
-  elqideanDistance(x1, x2, y1, y2) {
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-  }
-
-  handlerResize() {
-    this.containerSize = this.getContainerSize(this.container);
-    this.setImgsStyle();
-  }
-
-  getImgNaturalSize(img) {
+  initImgDontTouchConfig(img) {
     let coordinates = {
-      x1: img.left,
-      y1: img.top,
-      x2: img.left + img.naturalWidth,
-      y2: img.top + img.naturalHeight,
+      x1: undefined,
+      y1: undefined,
+      x2: undefined,
+      y2: undefined,
     };
-    let radius =
-      elqideanDistance(
-        coordinates.x1,
-        coordinates.x2,
-        coordinates.y1,
-        coordinates.y2
-      ) / 2;
+    let radius = Math.max(img.naturalHeight / 2, img.naturalWidth / 2);
     let center = {
-      x0: coordinates.x1 + radius,
-      y0: coordinates.y1 + radius,
+      x0: undefined, // will be x1 + radius when ricalulated
+      y0: undefined, // will be y1 + radius when ricalulated
     };
 
     return {
@@ -124,13 +121,73 @@ class Picrandomizer {
     };
   }
 
-  getRandomDontTouchPosition(imgSize) {}
+  dontTouchCriteria(imgConfig) {
+    let touch = false;
+    for (let otherImg of this.imgs) {
+      if (otherImg.imgConfig.coordinates.x0) {
+        touch =
+          elqideanDistance(
+            otherImg.imgConfig.center.x0,
+            imgConfig.center.x0,
+            otherImg.imgConfig.center.y0,
+            mgConfig.center.y0
+          ) <
+          otherImg.imgConfig.radius + imgConfig.radius;
+        if (touch) {
+          break;
+        }
+      }
+    }
+    return touch;
+  }
 
-  getRandomPosition(imgSize) {
-    let left =
-      this.rnd(this.containerSize.offsetWidth - imgSize.width, 0) + "px";
-    let top =
-      this.rnd(this.containerSize.offsetHeight - imgSize.height, 0) + "px";
+  elqideanDistance(x1, x2, y1, y2) {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+  }
+
+  handlerResize() {
+    this.containerSize = this.getContainerSize(this.container);
+    this.setImgsStyle();
+  }
+
+  getImgNaturalConfig(img) {
+    return {
+      height: img.naturalHeight,
+      width: img.naturalWidth,
+    };
+  }
+
+  getRandomDontTouchPosition(imgConfig) {
+    let tryCount = 0;
+    let randomPosition = this.getRandomPosition(img.imgConfig);
+
+    while (!this.dontTouchCriteria(imgConfig) || tryCount < 10) {
+      randomPosition = this.getRandomPosition(img.imgConfig);
+      img.imgConfig.coordinates.x1 = randomPosition.left;
+      img.imgConfig.coordinates.y1 = randomPosition.top;
+      img.imgConfig.coordinates.x2 = randomPosition.left + img.imgConfig.width;
+      img.imgConfig.coordinates.y2 = randomPosition.top + img.imgConfig.height;
+      img.imgConfig.center.x0 =
+        img.imgConfig.coordinates.x1 + img.imgConfig.radius;
+      img.imgConfig.center.y0 =
+        img.imgConfig.coordinates.y1 + img.imgConfig.radius;
+
+      tryCount++;
+    }
+    if (tryCount >= 10) {
+      img.isVisible = false;
+      img.imgConfig.coordinates.x1 = undefined;
+      img.imgConfig.coordinates.y1 = undefined;
+      img.imgConfig.coordinates.x2 = undefined;
+      img.imgConfig.coordinates.y2 = undefined;
+      img.imgConfig.center.x0 = undefined;
+      img.imgConfig.center.y0 = undefined;
+    }
+  }
+
+  getRandomPosition(imgConfig) {
+    let left = this.rnd(this.containerSize.offsetWidth - imgConfig.width, 0);
+    let top = this.rnd(this.containerSize.offsetHeight - imgConfig.height, 0);
 
     return { left: left, top: top };
   }
@@ -159,19 +216,31 @@ class Picrandomizer {
 	`;
   }
 
-  setImgStyle(imgSettings) {
-    let randomPosition = this.getRandomPosition(imgSettings.imgSize);
+  setCoordinates(imgConfig, newCoordinates) {
+    imgConfig.coordinates.x1 = newCoordinates.left;
+    imgConfig.coordinates.y1 = newCoordinates.top;
+    imgConfig.coordinates.x2 = newCoordinates.left + imgConfig.width;
+    imgConfig.coordinates.y2 = newCoordinates.left + imgConfig.height;
 
-    imgSettings.img.style.cssText = `
-		left: ${randomPosition.left};
-		position: absolute;
-		top: ${randomPosition.top};
-		user-select: none;
-		z-index: 0;
-  `;
+    imgConfig.center.x0 = imgConfig.coordinates.x1 + imgConfig.radius;
+    imgConfig.center.y0 = imgConfig.coordinates.y1 + imgConfig.radius;
+  }
 
-    if (this.rotation) {
-      imgSettings.img.style.transform = `rotate(${this.getRandomRotation()})`;
+  setImgStyle(img) {
+    if (img.isVisible) {
+      let randomPosition = this.getRandomPosition(img.imgConfig);
+
+      img.imgItself.style.cssText = `
+      left: ${randomPosition.left}px;
+      position: absolute;
+      top: ${randomPosition.top}px;
+      user-select: none;
+      z-index: 0;
+    `;
+
+      if (this.rotation) {
+        img.imgItself.style.transform = `rotate(${this.getRandomRotation()})`;
+      }
     }
   }
 
