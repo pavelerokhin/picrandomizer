@@ -81,10 +81,10 @@
     }
   </style>
   <body>
-    <!-- <section id="background1" class="background">
+    <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation</h1>
     </section>
-    <section id="background2" class="background">
+    <!-- <section id="background2" class="background">
       <div></div>
       <h1>Pic randomizer tool. No rotation</h1>
     </section>
@@ -95,7 +95,7 @@
       <h1>Pic randomizer tool. Long screen</h1>
     </section> -->
     <section id="background5" class="background long">
-      <h1>Pic randomizer tool. All images inside the container</h1>
+      <h1>Pic randomizer tool. All images inside are not touching</h1>
     </section>
     <section id="background6" class="background long">
       <h1>Pic randomizer tool. Container covered by images</h1>
@@ -120,15 +120,15 @@
 
     let imgUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
 
-    let imgUrls3 = ["/etc/gallery/6.png", "/etc/gallery/3.png"];
+    let imgUrls3 = ["/etc/gallery/6.png"];
 
     let imgUrls4 = ["/etc/gallery/8.png"];
 
-    // let bgpics1 = new Picrandomizer({
-    //   containerId: "background1",
-    //   imgUrls: imgUrls,
-    //   howManyPics: 4,
-    // });
+    let bgpics1 = new Picrandomizer({
+      containerId: "background1",
+      imgUrls: imgUrls,
+      howManyPics: 4,
+    });
     // let bgpics2 = new Picrandomizer({
     //   containerId: "background2",
     //   imgUrls: imgUrls,

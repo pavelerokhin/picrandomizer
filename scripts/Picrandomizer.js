@@ -63,21 +63,26 @@ class Picrandomizer {
       this.imgs.push({
         imgItself: img,
         imgConfig: this.getImgConfig(),
-        isVisible: true,
       });
     });
   }
 
-  init() {
+  async init() {
+    await this.preloadImages();
+
     if (!this.errorState) {
       for (let img of this.imgs) {
-        debugger;
         if (this.dontTouch) {
           this.setRandomDontTouchPosition(img.imgConfig);
         } else {
+          let randomPosition = this.getRandomPosition(img.imgConfig);
+          this.setPosition(img.imgConfig, randomPosition);
         }
-        this.setImgStyle(img);
-        this.container.appendChild(img.imgItself);
+        if (img.imgConfig.isVisible) {
+          debugger;
+          this.setImgStyle(img);
+          this.container.appendChild(img.imgItself);
+        }
       }
       window.addEventListener("resize", this.handlerResize.bind(this));
     } else {
@@ -87,11 +92,13 @@ class Picrandomizer {
     }
   }
 
-  dontTouchCriteria(imgConfig) {
-    debugger;
+  touchCriteria(imgConfig) {
     let touch = false;
     for (let otherImg of this.imgs) {
-      if (otherImg.imgConfig.corners[0].x) {
+      if (imgConfig == otherImg.imgConfig) {
+        continue;
+      }
+      if (otherImg.imgConfig.corners.length > 0) {
         touch = this.collision(imgConfig, otherImg.imgConfig);
         if (touch) {
           break;
@@ -112,6 +119,8 @@ class Picrandomizer {
       center: { x: undefined, y: undefined },
       corners: [],
       height: undefined,
+      isVisible: true,
+      projections: undefined,
       radius: undefined,
       rotation: undefined,
       width: undefined,
@@ -119,8 +128,8 @@ class Picrandomizer {
   }
 
   getRandomPosition(imgConfig) {
-    let left = this.rnd(this.containerSize.offsetWidth - imgConfig.width, 0);
-    let top = this.rnd(this.containerSize.offsetHeight - imgConfig.height, 0);
+    let left = this.rnd(this.containerSize.width - imgConfig.width, 0);
+    let top = this.rnd(this.containerSize.height - imgConfig.height, 0);
 
     return { left: left, top: top };
   }
@@ -131,11 +140,36 @@ class Picrandomizer {
 
   getContainerSize(container) {
     return {
-      clientWidth: container.clientWidth,
-      clientHeight: container.clientHeight,
-      offsetWidth: container.offsetWidth,
-      offsetHeight: container.offsetHeight,
+      // clientWidth: container.clientWidth,
+      // clientHeight: container.clientHeight,
+      width: container.offsetWidth,
+      height: container.offsetHeight,
     };
+  }
+
+  getImageSize(img) {
+    return {
+      height: img.width,
+      width: img.height,
+    };
+  }
+
+  async preloadImages() {
+    for (let img of this.imgs) {
+      const image = new Image();
+      const preload = (src) =>
+        new Promise((r) => {
+          image.onload = r;
+          image.onerror = r;
+          image.src = src;
+        });
+
+      // Preload an image
+      await preload(img.imgItself.src);
+      let imgSize = this.getImageSize(image);
+      img.imgConfig.height = imgSize.height;
+      img.imgConfig.width = imgSize.width;
+    }
   }
 
   rnd(a, b) {
@@ -150,7 +184,7 @@ class Picrandomizer {
   }
 
   setImgStyle(img) {
-    if (img.isVisible) {
+    if (img.imgConfig.isVisible) {
       img.imgItself.style.cssText = `
       left: ${img.imgConfig.corners[0].x}px;
       position: absolute;
@@ -167,10 +201,9 @@ class Picrandomizer {
 
   setProjections(imgConfig) {
     debugger;
-
     let center_x = imgConfig.center.x;
     let center_y = imgConfig.center.y;
-    let angle = imgConfig.rotation ? imgConfig1.rotation : 0;
+    let angle = imgConfig.rotation ? imgConfig.rotation : 0;
     let corners = imgConfig.corners;
 
     // Genere start Min-Max projection on center of Square
@@ -196,10 +229,10 @@ class Picrandomizer {
        */
 
       // Angle 0:horizontale (center > left) 90:verticatale (center > top)
-      var angle90 = -(angle % 90);
+      let angle90 = -(angle % 90);
 
       //Distance :
-      var distance_corner_center = Math.floor(
+      let distance_corner_center = Math.floor(
         Math.sqrt(
           (center_x - corner.x) * (center_x - corner.x) +
             (center_y - corner.y) * (center_y - corner.y)
@@ -207,8 +240,8 @@ class Picrandomizer {
       );
 
       // Angle between segment [center-corner] and real axe X (not square axe), must be negative (radius are negative clockwise)
-      var angle_with_axeX = -Math.floor(
-        Math.degrees(Math.atan((corner.y - center_y) / (corner.x - center_x)))
+      let angle_with_axeX = -Math.floor(
+        this.degrees(Math.atan((corner.y - center_y) / (corner.x - center_x)))
       ); // Tan(alpha) = opposé (ecart sur Y) / adjacent (ecart sur X)
       // If angle is ]0;90[, he is on the 2em et 4th quart of rotation
       if (angle_with_axeX > 0) {
@@ -223,7 +256,7 @@ class Picrandomizer {
       }
 
       // Calculate difference between 2 angles to know the angle between [center-corner] and Square axe X
-      var delta_angle = angle_with_axeX - angle90;
+      let delta_angle = angle_with_axeX - angle90;
       // If angle is on ]-180;-360], corner are upper than Square axe X, so set a positive angle on [0;180]
       if (delta_angle < -180) {
         delta_angle += 360;
@@ -234,18 +267,18 @@ class Picrandomizer {
        */
 
       // Calculate distance between center and projection on axe X
-      var distance_center_projection_x = Math.floor(
-        distance_corner_center * Math.cos(Math.radians(delta_angle))
+      let distance_center_projection_x = Math.floor(
+        distance_corner_center * Math.cos(this.radians(delta_angle))
       );
 
       // Create projection
       projection_x.x = Math.floor(
         center_x +
-          distance_center_projection_x * Math.cos(Math.radians(-angle90))
+          distance_center_projection_x * Math.cos(this.radians(-angle90))
       );
       projection_x.y = Math.floor(
         center_y +
-          distance_center_projection_x * Math.sin(Math.radians(-angle90))
+          distance_center_projection_x * Math.sin(this.radians(-angle90))
       );
 
       // If is the min ?
@@ -272,18 +305,18 @@ class Picrandomizer {
        */
 
       // Calculate distance between center and projection on axe Y
-      var distance_center_projection_y = Math.floor(
-        distance_corner_center * Math.cos(Math.radians(delta_angle - 90))
+      let distance_center_projection_y = Math.floor(
+        distance_corner_center * Math.cos(this.radians(delta_angle - 90))
       );
 
       // Create projection
       projection_y.x = Math.floor(
         center_x +
-          distance_center_projection_y * Math.cos(Math.radians(-angle90 - 90))
+          distance_center_projection_y * Math.cos(this.radians(-angle90 - 90))
       );
       projection_y.y = Math.floor(
         center_y +
-          distance_center_projection_y * Math.sin(Math.radians(-angle90 - 90))
+          distance_center_projection_y * Math.sin(this.radians(-angle90 - 90))
       );
 
       // If is the min ?
@@ -310,8 +343,7 @@ class Picrandomizer {
   }
 
   setPosition(imgConfig, randomPosition) {
-    debugger;
-
+    imgConfig.corners = [];
     imgConfig.corners.push({ x: randomPosition.left, y: randomPosition.top });
     imgConfig.corners.push({
       x: randomPosition.left + imgConfig.width,
@@ -325,6 +357,12 @@ class Picrandomizer {
       x: randomPosition.left,
       y: randomPosition.top + imgConfig.height,
     });
+
+    imgConfig.center = {
+      x: imgConfig.corners[0].x + imgConfig.width / 2,
+      y: imgConfig.corners[0].y + imgConfig.height / 2,
+    };
+
     if (this.rotation) {
       imgConfig.rotation = this.getRandomRotation();
     }
@@ -336,16 +374,16 @@ class Picrandomizer {
     this.setPosition(imgConfig, randomPosition);
     this.setProjections(imgConfig);
 
-    while (!this.dontTouchCriteria(imgConfig) || tryCount < 10) {
+    while (this.touchCriteria(imgConfig) && tryCount < 10) {
       let randomPosition = this.getRandomPosition(imgConfig);
       this.setPosition(imgConfig, randomPosition);
       this.setProjections(imgConfig);
       tryCount++;
     }
     if (tryCount >= 10) {
-      img.isVisible = false;
-      img.imgConfig.corners = [];
-      img.imgConfig.rotation = undefined;
+      imgConfig.isVisible = false;
+      imgConfig.corners = [];
+      imgConfig.rotation = undefined;
     }
   }
 
@@ -360,11 +398,13 @@ class Picrandomizer {
 
   // collision utils
   collision(imgConfig1, imgConfig2) {
-    debugger;
+    if (!imgConfig1.projections || !imgConfig2.projections) {
+      return false;
+    }
 
     imgConfig1.projections.x.is_collide =
       (imgConfig1.projections.x.min.distance <= -imgConfig2.width / 2 &&
-        imgConfig1.projections.x.max.distance >= -mgConfig2.width / 2) ||
+        imgConfig1.projections.x.max.distance >= -imgConfig2.width / 2) ||
       (imgConfig1.projections.x.min.distance <= imgConfig2.width / 2 &&
         imgConfig1.projections.x.max.distance >= imgConfig2.width / 2) ||
       (imgConfig1.projections.x.min.distance >= -imgConfig2.width / 2 &&
@@ -378,7 +418,7 @@ class Picrandomizer {
       (imgConfig1.projections.y.min.distance <= imgConfig2.height / 2 &&
         imgConfig1.projections.y.max.distance >= imgConfig2.height / 2) ||
       (imgConfig1.projections.y.min.distance >= -imgConfig2.height / 2 &&
-        imgConfig1.fixed_projections.y.max.distance <= imgConfig2.height / 2)
+        imgConfig1.projections.y.max.distance <= imgConfig2.height / 2)
         ? true
         : false;
 
@@ -396,9 +436,9 @@ class Picrandomizer {
       (imgConfig2.projections.y.min.distance <= -imgConfig1.height / 2 &&
         imgConfig2.projections.y.max.distance >= -imgConfig1.height / 2) ||
       (imgConfig2.projections.y.min.distance <= imgConfig1.height / 2 &&
-        collide.cursor_projections.y.max.distance >= imgConfig1.height / 2) ||
+        imgConfig2.projections.y.max.distance >= imgConfig1.height / 2) ||
       (imgConfig2.projections.y.min.distance >= -imgConfig1.height / 2 &&
-        collide.cursor_projections.y.max.distance <= imgConfig1.height / 2)
+        imgConfig2.projections.y.max.distance <= imgConfig1.height / 2)
         ? true
         : false;
 
@@ -408,5 +448,13 @@ class Picrandomizer {
       imgConfig2.projections.y.is_collide
       ? true
       : false;
+  }
+
+  radians(degrees) {
+    return (degrees * Math.PI) / 180;
+  }
+
+  degrees(radians) {
+    return (radians * 180) / Math.PI;
   }
 }
