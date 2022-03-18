@@ -19,11 +19,11 @@ All the parameters have to be passed to the Picrandomizer's constructor. The nst
 Requested parameters:
 
 - `containerId` - String, an id in DOM of the container for `Picrandomizer`.
-- `imgUrls` - An array of strings. Urls for the images to show,
+- `imagesUrls` - An array of strings. Urls for the images to show,
 
 Optional parameters:
 
-- `howManyPics` - Number, how many images from `imgUrls` will be shown at a time. Default: `-1` (all the images),
+- `howManyImages` - Number, how many images from `imagesUrls` will be shown at a time. Default: `-1` (all the images),
 - `repetition` - Boolean, if the images provided to Picrandomizer can be repeated. Default: `false`,
 - `rotation` Boolean parameter, if true the images will be rotated randomly. Default: `true`.
 
@@ -43,7 +43,7 @@ E.g.:
   <script>
       const background = new Picrandomizer({
         containerId: "background",
-        imgUrls: ["url/to/1.jpg","url/to/2.jpg","url/to/3.jpg"],
+        imagesUrls: ["url/to/1.jpg","url/to/2.jpg","url/to/3.jpg"],
 				2,
 				rotation: false
       });
