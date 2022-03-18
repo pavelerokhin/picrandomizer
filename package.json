@@ -1,0 +1,29 @@
+{
+  "name": "picrandomizer",
+  "version": "1.0.0",
+  "description": "tool for background image randomization",
+  "main": "/scripts/Picrandomizer.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavelerokhin/picrandomizer.git"
+  },
+  "keywords": [
+    "background",
+    "image",
+    "randomization",
+    "covering",
+    "background"
+  ],
+  "author": "Pavel Erokhin (Unionecreativa)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pavelerokhin/picrandomizer/issues"
+  },
+  "homepage": "https://github.com/pavelerokhin/picrandomizer#readme",
+  "dependencies": {
+    "jest": "^27.5.1"
+  }
+}

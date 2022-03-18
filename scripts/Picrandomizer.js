@@ -458,3 +458,5 @@ class Picrandomizer {
     return (radians * 180) / Math.PI;
   }
 }
+
+module.exports = Picrandomizer;
