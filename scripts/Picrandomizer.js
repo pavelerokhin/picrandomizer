@@ -67,7 +67,7 @@ class Picrandomizer {
     });
   }
 
-  async init() {
+  async show() {
     await this.preloadImages();
 
     if (!this.errorState) {
@@ -87,7 +87,7 @@ class Picrandomizer {
       window.addEventListener("resize", this.handlerResize.bind(this));
     } else {
       console.error(
-        "Due to errors, it's impossible to initialize Picrandomizer"
+        "Due to errors, it's impossible to visualize Picrandomizer"
       );
     }
   }
