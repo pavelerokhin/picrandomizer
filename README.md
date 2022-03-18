@@ -14,7 +14,7 @@ Soon the lib will be published in `npm`.
 
 ## Parameters
 
-All the parameters have to be passed to the Picrandomizer's constructor. The nstance of Picrandomized has to be initizlized with `init()` method (preferebly on page load).
+All the parameters have to be passed to the Picrandomizer's constructor. The nstance of Picrandomized has to be visualized with `show()` method (preferebly on page load).
 
 Requested parameters:
 
@@ -49,7 +49,7 @@ E.g.:
       });
 
       windod.onload = () => {
-      	background.init();
+      	background.show();
       }
   </script>
 </body>
