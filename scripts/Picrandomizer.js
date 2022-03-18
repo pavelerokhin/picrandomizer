@@ -1,460 +1,573 @@
 class Picrandomizer {
   constructor({
     containerId,
-    imgUrls,
+    imagesUrls,
     dontTouch = false,
-    howManyPics = -1,
+    howManyImages = -1,
     repetition = false,
     rotation = true,
   }) {
-    containerId = containerId.trim();
-    if (howManyPics < 0) {
-      howManyPics = imgUrls.length;
-    }
+    this.errors.errorState = false;
 
-    this.errorState = false;
+    this.config.containerId = containerId.trim();
+    this.config.imagesUrls = imagesUrls;
+    this.config.dontTouch = dontTouch;
+    this.config.howManyImages = howManyImages;
+    this.config.repetition = repetition;
+    this.config.rotation = rotation;
+
+    this.setParent();
 
     // tests
-    if (containerId.length == 0) {
-      console.error("no Picrandomizer's container has been set");
-      this.errorState = true;
-      return;
-    }
-    if (imgUrls.length == 0) {
-      console.error("no Picrandomizer's images urls have been set");
-      this.errorState = true;
-      return;
-    }
-    if (howManyPics > imgUrls.length && !repetition) {
-      console.error(
-        `can't take ${howManyPics} from the pictures provided (${imgUrls.length} images) without repetition`
-      );
-      this.errorState = true;
+    this.controls.containerExistsInDOM();
+    this.controls.imagesUrlsIsNotEmpty();
+    this.controls.isItPossibleToPrimtImagesWithNoRepetition();
+    if (this.errors.errorState) {
+      this.errors.logErrorMessages();
       return;
     }
 
-    this.container = document.getElementById(containerId);
-    this.containerSize = this.getContainerSize(this.container);
-    this.dontTouch = dontTouch;
-    this.howManyPics = howManyPics;
-    this.imgUrls = imgUrls;
-    this.imgs = [];
-    this.repetition = repetition;
-    this.rotation = rotation;
+    // intiialization
+    this.container.dom = document.getElementById(containerId);
+    this.container.size = this.container.getSize();
 
-    this.setContainerStyle();
+    this.images.howManyImages =
+      this.config.howManyImages > 0
+        ? this.config.imagesUrls.length
+        : this.config.howManyImages;
+    this.images.images = [];
 
-    if (this.repetition) {
-      let tmpUrls = [];
-      for (let i = 0; i < this.howManyPics; i++) {
-        tmpUrls.push(this.imgUrls[this.rnd(this.imgUrls.length, 0)]);
+    this.container.setStyle();
+
+    if (this.config.repetition) {
+      for (let i = 0; i < this.config.howManyImages; i++) {
+        this.images.imagesUrls.push(
+          this.config.imagesUrls[this.utils.rnd(this.config.imagesUrls.length)]
+        );
       }
-      this.imgUrls = tmpUrls;
     } else {
-      this.shuffleArray(this.imgUrls);
-      this.imgUrls = this.imgUrls.slice(0, howManyPics);
+      this.images.imagesUrls = this.utils
+        .shuffleArray(this.config.imagesUrls)
+        .slice(0, this.config.howManyImages);
     }
 
-    this.imgUrls.forEach((url) => {
+    this.images.imagesUrls.forEach((url) => {
       let img = document.createElement("img");
       img.src = url;
       img.setAttribute("draggable", "false");
 
-      this.imgs.push({
+      this.images.images.push({
         imgItself: img,
-        imgConfig: this.getImgConfig(),
+        imgConfig: this.images.getConfigObject(),
       });
     });
   }
 
-  async show() {
-    await this.preloadImages();
+  container = {
+    parent: undefined,
 
-    if (!this.errorState) {
-      for (let img of this.imgs) {
-        if (this.dontTouch) {
-          this.setRandomDontTouchPosition(img.imgConfig);
-        } else {
-          let randomPosition = this.getRandomPosition(img.imgConfig);
-          this.setPosition(img.imgConfig, randomPosition);
-        }
-        if (img.imgConfig.isVisible) {
-          debugger;
-          this.setImgStyle(img);
-          this.container.appendChild(img.imgItself);
-        }
-      }
-      window.addEventListener("resize", this.handlerResize.bind(this));
-    } else {
-      console.error(
-        "Due to errors, it's impossible to visualize Picrandomizer"
-      );
-    }
-  }
-
-  touchCriteria(imgConfig) {
-    let touch = false;
-    for (let otherImg of this.imgs) {
-      if (imgConfig == otherImg.imgConfig) {
-        continue;
-      }
-      if (otherImg.imgConfig.corners.length > 0) {
-        touch = this.collision(imgConfig, otherImg.imgConfig);
-        if (touch) {
-          break;
-        }
-      }
-    }
-    return touch;
-  }
-
-  // TODO: remake
-  handlerResize() {
-    this.containerSize = this.getContainerSize(this.container);
-    this.setImgsStyle();
-  }
-
-  getImgConfig() {
-    return {
-      center: { x: undefined, y: undefined },
-      corners: [],
+    dom: undefined,
+    size: {
       height: undefined,
-      isVisible: true,
-      projections: undefined,
-      radius: undefined,
-      rotation: undefined,
       width: undefined,
-    };
-  }
+    },
+    getSize() {
+      return {
+        width: this.dom.offsetWidth,
+        height: this.dom.offsetHeight,
+      };
+    },
 
-  getRandomPosition(imgConfig) {
-    let left = this.rnd(this.containerSize.width - imgConfig.width, 0);
-    let top = this.rnd(this.containerSize.height - imgConfig.height, 0);
+    handlerResize() {
+      debugger; // TODO: test and maybe remake the method
+      this.parent.container.size = this.parent.container.getSize();
+      //here it was setImgsStyle (old version cycle)
+    },
 
-    return { left: left, top: top };
-  }
-
-  getRandomRotation() {
-    return this.rnd(364, 0);
-  }
-
-  getContainerSize(container) {
-    return {
-      // clientWidth: container.clientWidth,
-      // clientHeight: container.clientHeight,
-      width: container.offsetWidth,
-      height: container.offsetHeight,
-    };
-  }
-
-  getImageSize(img) {
-    return {
-      height: img.width,
-      width: img.height,
-    };
-  }
-
-  async preloadImages() {
-    for (let img of this.imgs) {
-      const image = new Image();
-      const preload = (src) =>
-        new Promise((r) => {
-          image.onload = r;
-          image.onerror = r;
-          image.src = src;
-        });
-
-      // Preload an image
-      await preload(img.imgItself.src);
-      let imgSize = this.getImageSize(image);
-      img.imgConfig.height = imgSize.height;
-      img.imgConfig.width = imgSize.width;
-    }
-  }
-
-  rnd(a, b) {
-    return Math.floor(Math.random() * a) + b;
-  }
-
-  setContainerStyle() {
-    this.container.style.cssText = `
-		overflow: hidden;
-		position: relative;
-	`;
-  }
-
-  setImgStyle(img) {
-    if (img.imgConfig.isVisible) {
-      img.imgItself.style.cssText = `
-      left: ${img.imgConfig.corners[0].x}px;
-      position: absolute;
-      top: ${img.imgConfig.corners[0].y}px;
-      user-select: none;
-      z-index: 0;
+    setStyle() {
+      this.dom.style.cssText = `
+      overflow: hidden;
+      position: relative;
     `;
+    },
+  };
 
-      if (this.rotation) {
-        img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
+  controls = {
+    parent: undefined,
+
+    containerExistsInDOM() {
+      if (this.parent.config.containerId.length == 0) {
+        this.parent.errors.errorMessages.push(
+          "no Picrandomizer's container has been set"
+        );
+        this.parent.errors.errorState = true;
       }
-    }
-  }
 
-  setProjections(imgConfig) {
-    debugger;
-    let center_x = imgConfig.center.x;
-    let center_y = imgConfig.center.y;
-    let angle = imgConfig.rotation ? imgConfig.rotation : 0;
-    let corners = imgConfig.corners;
+      return;
+    },
 
-    // Genere start Min-Max projection on center of Square
-    let projections = {
-      x: {
-        min: null,
-        max: null,
-        distance: null,
-      },
-      y: {
-        min: null,
-        max: null,
-        distance: null,
-      },
-    };
-
-    for (let corner of corners) {
-      let projection_x = {},
-        projection_y = {};
-
-      /**
-       * Global calculation for projection X and Y
-       */
-
-      // Angle 0:horizontale (center > left) 90:verticatale (center > top)
-      let angle90 = -(angle % 90);
-
-      //Distance :
-      let distance_corner_center = Math.floor(
-        Math.sqrt(
-          (center_x - corner.x) * (center_x - corner.x) +
-            (center_y - corner.y) * (center_y - corner.y)
-        )
-      );
-
-      // Angle between segment [center-corner] and real axe X (not square axe), must be negative (radius are negative clockwise)
-      let angle_with_axeX = -Math.floor(
-        this.degrees(Math.atan((corner.y - center_y) / (corner.x - center_x)))
-      ); // Tan(alpha) = opposé (ecart sur Y) / adjacent (ecart sur X)
-      // If angle is ]0;90[, he is on the 2em et 4th quart of rotation
-      if (angle_with_axeX > 0) {
-        angle_with_axeX -= 180;
+    imagesUrlsIsNotEmpty() {
+      if (this.parent.config.imagesUrls.length == 0) {
+        this.parent.errors.errorMessages.push(
+          "no Picrandomizer's images urls have been set"
+        );
+        this.parent.errors.errorState = true;
       }
-      // If corner as upper (so with less pixel on y) thant center, he is on 3th or 4th quart of rotation
+
+      return;
+    },
+
+    isItPossibleToPrimtImagesWithNoRepetition() {
+      let imagesN =
+        this.parent.config.howManyImages >= 0
+          ? this.parent.config.howManyImages
+          : urlsN;
+      let urlsN = this.parent.config.imagesUrls.length;
+
       if (
-        corner.y < center_y ||
-        (corner.y == center_y && corner.x < center_x)
+        imagesN > this.parent.config.imagesUrls.length &&
+        !this.parent.config.repetition
       ) {
-        angle_with_axeX -= 180;
+        this.parent.errors.errorMessages.push(
+          `can't take ${imagesN} from the pictures provided (${urlsN} images) without repetition`
+        );
+        this.parent.errors.errorState = true;
       }
 
-      // Calculate difference between 2 angles to know the angle between [center-corner] and Square axe X
-      let delta_angle = angle_with_axeX - angle90;
-      // If angle is on ]-180;-360], corner are upper than Square axe X, so set a positive angle on [0;180]
-      if (delta_angle < -180) {
-        delta_angle += 360;
+      return;
+    },
+  };
+
+  config = {
+    containerId: undefined,
+    imagesUrls: [],
+    dontTouch: false,
+    howManyImages: -1,
+    repetition: false,
+    rotation: true,
+  };
+
+  errors = {
+    parent: undefined,
+
+    errorState: false,
+    errorMessages: [],
+
+    logErrorMessages() {
+      if (this.errorState) {
+        console.error("Prirandomazer is in error state!");
+        errorMessages.forEach((e, i) => {
+          console.error(i, ":", e);
+        });
+      }
+    },
+  };
+
+  geometry = {
+    isCollision(imgConfig1, imgConfig2) {
+      if (!imgConfig1.projections || !imgConfig2.projections) {
+        return false;
       }
 
-      /**
-       * Projection on X
-       */
+      imgConfig1.projections.x.is_collide =
+        (imgConfig1.projections.x.min.distance <= -imgConfig2.width / 2 &&
+          imgConfig1.projections.x.max.distance >= -imgConfig2.width / 2) ||
+        (imgConfig1.projections.x.min.distance <= imgConfig2.width / 2 &&
+          imgConfig1.projections.x.max.distance >= imgConfig2.width / 2) ||
+        (imgConfig1.projections.x.min.distance >= -imgConfig2.width / 2 &&
+          imgConfig1.projections.x.max.distance <= imgConfig2.width / 2)
+          ? true
+          : false;
 
-      // Calculate distance between center and projection on axe X
-      let distance_center_projection_x = Math.floor(
-        distance_corner_center * Math.cos(this.radians(delta_angle))
-      );
+      imgConfig1.projections.y.is_collide =
+        (imgConfig1.projections.y.min.distance <= -imgConfig2.height / 2 &&
+          imgConfig1.projections.y.max.distance >= -imgConfig2.height / 2) ||
+        (imgConfig1.projections.y.min.distance <= imgConfig2.height / 2 &&
+          imgConfig1.projections.y.max.distance >= imgConfig2.height / 2) ||
+        (imgConfig1.projections.y.min.distance >= -imgConfig2.height / 2 &&
+          imgConfig1.projections.y.max.distance <= imgConfig2.height / 2)
+          ? true
+          : false;
 
-      // Create projection
-      projection_x.x = Math.floor(
-        center_x +
-          distance_center_projection_x * Math.cos(this.radians(-angle90))
-      );
-      projection_x.y = Math.floor(
-        center_y +
-          distance_center_projection_x * Math.sin(this.radians(-angle90))
-      );
+      imgConfig2.projections.x.is_collide =
+        (imgConfig2.projections.x.min.distance <= -imgConfig1.width / 2 &&
+          imgConfig2.projections.x.max.distance >= -imgConfig1.width / 2) ||
+        (imgConfig2.projections.x.min.distance <= imgConfig1.width / 2 &&
+          imgConfig2.projections.x.max.distance >= imgConfig1.width / 2) ||
+        (imgConfig2.projections.x.min.distance >= -imgConfig1.width / 2 &&
+          imgConfig2.projections.x.max.distance <= imgConfig1.width / 2)
+          ? true
+          : false;
 
-      // If is the min ?
-      if (
-        projections.x.min == null ||
-        distance_center_projection_x < projections.x.min.distance
-      ) {
-        projections.x.min = projection_x;
-        projections.x.min.distance = distance_center_projection_x;
-        projections.x.min.corner = corner;
+      imgConfig2.projections.y.is_collide =
+        (imgConfig2.projections.y.min.distance <= -imgConfig1.height / 2 &&
+          imgConfig2.projections.y.max.distance >= -imgConfig1.height / 2) ||
+        (imgConfig2.projections.y.min.distance <= imgConfig1.height / 2 &&
+          imgConfig2.projections.y.max.distance >= imgConfig1.height / 2) ||
+        (imgConfig2.projections.y.min.distance >= -imgConfig1.height / 2 &&
+          imgConfig2.projections.y.max.distance <= imgConfig1.height / 2)
+          ? true
+          : false;
+
+      return imgConfig1.projections.x.is_collide &&
+        imgConfig1.projections.y.is_collide &&
+        imgConfig2.projections.x.is_collide &&
+        imgConfig2.projections.y.is_collide
+        ? true
+        : false;
+    },
+
+    setProjections(imgConfig) {
+      debugger;
+      let center_x = imgConfig.center.x;
+      let center_y = imgConfig.center.y;
+      let angle = imgConfig.rotation ? imgConfig.rotation : 0;
+      let corners = imgConfig.corners;
+
+      // Genere start Min-Max projection on center of Square
+      let projections = {
+        x: {
+          min: null,
+          max: null,
+          distance: null,
+        },
+        y: {
+          min: null,
+          max: null,
+          distance: null,
+        },
+      };
+
+      for (let corner of corners) {
+        let projection_x = {},
+          projection_y = {};
+
+        /**
+         * Global calculation for projection X and Y
+         */
+
+        // Angle 0:horizontale (center > left) 90:verticatale (center > top)
+        let angle90 = -(angle % 90);
+
+        //Distance :
+        let distance_corner_center = Math.floor(
+          Math.sqrt(
+            (center_x - corner.x) * (center_x - corner.x) +
+              (center_y - corner.y) * (center_y - corner.y)
+          )
+        );
+
+        // Angle between segment [center-corner] and real axe X (not square axe), must be negative (radius are negative clockwise)
+        let angle_with_axeX = -Math.floor(
+          this.parent.utils.degrees(
+            Math.atan((corner.y - center_y) / (corner.x - center_x))
+          )
+        ); // Tan(alpha) = opposé (ecart sur Y) / adjacent (ecart sur X)
+        // If angle is ]0;90[, he is on the 2em et 4th quart of rotation
+        if (angle_with_axeX > 0) {
+          angle_with_axeX -= 180;
+        }
+        // If corner as upper (so with less pixel on y) thant center, he is on 3th or 4th quart of rotation
+        if (
+          corner.y < center_y ||
+          (corner.y == center_y && corner.x < center_x)
+        ) {
+          angle_with_axeX -= 180;
+        }
+
+        // Calculate difference between 2 angles to know the angle between [center-corner] and Square axe X
+        let delta_angle = angle_with_axeX - angle90;
+        // If angle is on ]-180;-360], corner are upper than Square axe X, so set a positive angle on [0;180]
+        if (delta_angle < -180) {
+          delta_angle += 360;
+        }
+
+        /**
+         * Projection on X
+         */
+
+        // Calculate distance between center and projection on axe X
+        let distance_center_projection_x = Math.floor(
+          distance_corner_center *
+            Math.cos(this.parent.utils.radians(delta_angle))
+        );
+
+        // Create projection
+        projection_x.x = Math.floor(
+          center_x +
+            distance_center_projection_x *
+              Math.cos(this.parent.utils.radians(-angle90))
+        );
+        projection_x.y = Math.floor(
+          center_y +
+            distance_center_projection_x *
+              Math.sin(this.parent.utils.radians(-angle90))
+        );
+
+        // If is the min ?
+        if (
+          projections.x.min == null ||
+          distance_center_projection_x < projections.x.min.distance
+        ) {
+          projections.x.min = projection_x;
+          projections.x.min.distance = distance_center_projection_x;
+          projections.x.min.corner = corner;
+        }
+        // Is the max ?
+        if (
+          projections.x.max == null ||
+          distance_center_projection_x > projections.x.max.distance
+        ) {
+          projections.x.max = projection_x;
+          projections.x.max.distance = distance_center_projection_x;
+          projections.x.max.corner = corner;
+        }
+
+        /**
+         * Projection on Y
+         */
+
+        // Calculate distance between center and projection on axe Y
+        let distance_center_projection_y = Math.floor(
+          distance_corner_center *
+            Math.cos(this.parent.utils.radians(delta_angle - 90))
+        );
+
+        // Create projection
+        projection_y.x = Math.floor(
+          center_x +
+            distance_center_projection_y *
+              Math.cos(this.parent.utils.radians(-angle90 - 90))
+        );
+        projection_y.y = Math.floor(
+          center_y +
+            distance_center_projection_y *
+              Math.sin(this.parent.utils.radians(-angle90 - 90))
+        );
+
+        // If is the min ?
+        if (
+          projections.y.min == null ||
+          distance_center_projection_y < projections.y.min.distance
+        ) {
+          projections.y.min = projection_y;
+          projections.y.min.distance = distance_center_projection_y;
+          projections.y.min.corner = corner;
+        }
+        // Is the max ?
+        if (
+          projections.y.max == null ||
+          distance_center_projection_y > projections.y.max.distance
+        ) {
+          projections.y.max = projection_y;
+          projections.y.max.distance = distance_center_projection_y;
+          projections.y.max.corner = corner;
+        }
       }
-      // Is the max ?
-      if (
-        projections.x.max == null ||
-        distance_center_projection_x > projections.x.max.distance
-      ) {
-        projections.x.max = projection_x;
-        projections.x.max.distance = distance_center_projection_x;
-        projections.x.max.corner = corner;
-      }
 
-      /**
-       * Projection on Y
-       */
+      imgConfig.projections = projections;
+    },
+  };
 
-      // Calculate distance between center and projection on axe Y
-      let distance_center_projection_y = Math.floor(
-        distance_corner_center * Math.cos(this.radians(delta_angle - 90))
+  images = {
+    parent: undefined,
+
+    howManyImages: 0,
+    imagesUrls: [],
+    images: [],
+
+    getConfigObject() {
+      return {
+        center: { x: undefined, y: undefined },
+        corners: [],
+        height: undefined,
+        isVisible: true,
+        projections: undefined,
+        radius: undefined,
+        rotation: undefined,
+        width: undefined,
+      };
+    },
+
+    getRandomPosition(imgConfig) {
+      let left = this.parent.utils.rnd(
+        this.parent.container.size.width - imgConfig.width
+      );
+      let top = this.parent.utils.rnd(
+        this.parent.container.size.height - imgConfig.height
       );
 
-      // Create projection
-      projection_y.x = Math.floor(
-        center_x +
-          distance_center_projection_y * Math.cos(this.radians(-angle90 - 90))
-      );
-      projection_y.y = Math.floor(
-        center_y +
-          distance_center_projection_y * Math.sin(this.radians(-angle90 - 90))
-      );
+      return { left: left, top: top };
+    },
 
-      // If is the min ?
-      if (
-        projections.y.min == null ||
-        distance_center_projection_y < projections.y.min.distance
-      ) {
-        projections.y.min = projection_y;
-        projections.y.min.distance = distance_center_projection_y;
-        projections.y.min.corner = corner;
+    getRandomRotation() {
+      return this.parent.utils.rnd(365);
+    },
+
+    getSize(img) {
+      return {
+        height: img.width,
+        width: img.height,
+      };
+    },
+
+    async preload() {
+      for (let img of this.images.images) {
+        const image = new Image();
+        const preloadImage = (src) =>
+          new Promise((r) => {
+            image.onload = r;
+            image.onerror = r;
+            image.src = src;
+          });
+
+        // Preload an image
+        await preloadImage(img.imgItself.src);
+        let imgSize = this.getSize(image);
+        img.imgConfig.height = imgSize.height;
+        img.imgConfig.width = imgSize.width;
       }
-      // Is the max ?
-      if (
-        projections.y.max == null ||
-        distance_center_projection_y > projections.y.max.distance
-      ) {
-        projections.y.max = projection_y;
-        projections.y.max.distance = distance_center_projection_y;
-        projections.y.max.corner = corner;
+    },
+
+    setStyle(img) {
+      if (img.imgConfig.isVisible) {
+        img.imgItself.style.cssText = `
+        left: ${img.imgConfig.corners[0].x}px;
+        position: absolute;
+        top: ${img.imgConfig.corners[0].y}px;
+        user-select: none;
+        z-index: 0;
+      `;
+
+        if (this.parent.config.rotation) {
+          img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
+        }
       }
-    }
+    },
 
-    imgConfig.projections = projections;
-  }
+    setPosition(imgConfig, randomPosition) {
+      imgConfig.corners = [];
+      imgConfig.corners.push({ x: randomPosition.left, y: randomPosition.top });
+      imgConfig.corners.push({
+        x: randomPosition.left + imgConfig.width,
+        y: randomPosition.top,
+      });
+      imgConfig.corners.push({
+        x: randomPosition.left + imgConfig.width,
+        y: randomPosition.top + imgConfig.height,
+      });
+      imgConfig.corners.push({
+        x: randomPosition.left,
+        y: randomPosition.top + imgConfig.height,
+      });
 
-  setPosition(imgConfig, randomPosition) {
-    imgConfig.corners = [];
-    imgConfig.corners.push({ x: randomPosition.left, y: randomPosition.top });
-    imgConfig.corners.push({
-      x: randomPosition.left + imgConfig.width,
-      y: randomPosition.top,
-    });
-    imgConfig.corners.push({
-      x: randomPosition.left + imgConfig.width,
-      y: randomPosition.top + imgConfig.height,
-    });
-    imgConfig.corners.push({
-      x: randomPosition.left,
-      y: randomPosition.top + imgConfig.height,
-    });
+      imgConfig.center = {
+        x: imgConfig.corners[0].x + imgConfig.width / 2,
+        y: imgConfig.corners[0].y + imgConfig.height / 2,
+      };
 
-    imgConfig.center = {
-      x: imgConfig.corners[0].x + imgConfig.width / 2,
-      y: imgConfig.corners[0].y + imgConfig.height / 2,
-    };
+      if (this.parent.config.rotation) {
+        imgConfig.rotation = this.getRandomRotation();
+      }
+    },
 
-    if (this.rotation) {
-      imgConfig.rotation = this.getRandomRotation();
-    }
-  }
-
-  setRandomDontTouchPosition(imgConfig) {
-    let tryCount = 0;
-    let randomPosition = this.getRandomPosition(imgConfig);
-    this.setPosition(imgConfig, randomPosition);
-    this.setProjections(imgConfig);
-
-    while (this.touchCriteria(imgConfig) && tryCount < 10) {
+    setPositionNotTouchingAnyone(imgConfig) {
+      let tryCount = 0;
       let randomPosition = this.getRandomPosition(imgConfig);
       this.setPosition(imgConfig, randomPosition);
-      this.setProjections(imgConfig);
-      tryCount++;
-    }
-    if (tryCount >= 10) {
-      imgConfig.isVisible = false;
-      imgConfig.corners = [];
-      imgConfig.rotation = undefined;
-    }
+      this.parent.geometry.setProjections(imgConfig);
+
+      while (this.touchesAnyone(imgConfig) && tryCount < 10) {
+        let randomPosition = this.getRandomPosition(imgConfig);
+        this.setPosition(imgConfig, randomPosition);
+        this.parent.geometry.setProjections(imgConfig);
+        tryCount++;
+      }
+      if (tryCount >= 10) {
+        imgConfig.isVisible = false;
+        imgConfig.corners = [];
+        imgConfig.rotation = undefined;
+      }
+    },
+
+    touchesAnyone(imgConfig) {
+      let touch = false;
+      for (let otherImg of this.images) {
+        if (imgConfig == otherImg.imgConfig) {
+          continue;
+        }
+        if (otherImg.imgConfig.corners.length > 0) {
+          touch = this.geometry.isCollision(imgConfig, otherImg.imgConfig);
+          if (touch) {
+            break;
+          }
+        }
+      }
+      return touch;
+    },
+  };
+
+  utils = {
+    degrees(radians) {
+      return (radians * 180) / Math.PI;
+    },
+
+    radians(degrees) {
+      return (degrees * Math.PI) / 180;
+    },
+
+    // random number in scope: [0,a)
+    rnd(a) {
+      return Math.floor(Math.random() * a);
+    },
+
+    shuffleArray(array) {
+      let result = array.map((x) => x);
+      for (let i = result.length - 1; i > 0; i--) {
+        let j = this.rnd(i + 1);
+        let temp = result[i];
+        result[i] = result[j];
+        result[j] = temp;
+      }
+
+      return result;
+    },
+  };
+
+  async preload() {
+    await this.images.preload();
   }
 
-  shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-      var j = this.rnd(i + 1, 0);
-      var temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
+  setParent() {
+    // pass the link to the parent instance
+    this.container.parent = this;
+    this.controls.parent = this;
+    this.config.parent = this;
+    this.errors.parent = this;
+    this.images.parent = this;
+    this.utils.parent = this;
+  }
+
+  async show() {
+    if (!this.errors.errorState) {
+      for (let img of this.images.images) {
+        if (this.config.dontTouch) {
+          this.images.setPositionNotTouchingAnyone(img.imgConfig);
+        } else {
+          let randomPosition = this.images.getRandomPosition(img.imgConfig);
+          this.images.setPosition(img.imgConfig, randomPosition);
+        }
+        if (img.imgConfig.isVisible) {
+          this.images.setStyle(img);
+          this.container.dom.appendChild(img.imgItself);
+        }
+      }
+      window.addEventListener(
+        "resize",
+        this.container.handlerResize.bind(this)
+      );
+    } else {
+      this.errors.logErrorMessages();
     }
-  }
-
-  // collision utils
-  collision(imgConfig1, imgConfig2) {
-    if (!imgConfig1.projections || !imgConfig2.projections) {
-      return false;
-    }
-
-    imgConfig1.projections.x.is_collide =
-      (imgConfig1.projections.x.min.distance <= -imgConfig2.width / 2 &&
-        imgConfig1.projections.x.max.distance >= -imgConfig2.width / 2) ||
-      (imgConfig1.projections.x.min.distance <= imgConfig2.width / 2 &&
-        imgConfig1.projections.x.max.distance >= imgConfig2.width / 2) ||
-      (imgConfig1.projections.x.min.distance >= -imgConfig2.width / 2 &&
-        imgConfig1.projections.x.max.distance <= imgConfig2.width / 2)
-        ? true
-        : false;
-
-    imgConfig1.projections.y.is_collide =
-      (imgConfig1.projections.y.min.distance <= -imgConfig2.height / 2 &&
-        imgConfig1.projections.y.max.distance >= -imgConfig2.height / 2) ||
-      (imgConfig1.projections.y.min.distance <= imgConfig2.height / 2 &&
-        imgConfig1.projections.y.max.distance >= imgConfig2.height / 2) ||
-      (imgConfig1.projections.y.min.distance >= -imgConfig2.height / 2 &&
-        imgConfig1.projections.y.max.distance <= imgConfig2.height / 2)
-        ? true
-        : false;
-
-    imgConfig2.projections.x.is_collide =
-      (imgConfig2.projections.x.min.distance <= -imgConfig1.width / 2 &&
-        imgConfig2.projections.x.max.distance >= -imgConfig1.width / 2) ||
-      (imgConfig2.projections.x.min.distance <= imgConfig1.width / 2 &&
-        imgConfig2.projections.x.max.distance >= imgConfig1.width / 2) ||
-      (imgConfig2.projections.x.min.distance >= -imgConfig1.width / 2 &&
-        imgConfig2.projections.x.max.distance <= imgConfig1.width / 2)
-        ? true
-        : false;
-
-    imgConfig2.projections.y.is_collide =
-      (imgConfig2.projections.y.min.distance <= -imgConfig1.height / 2 &&
-        imgConfig2.projections.y.max.distance >= -imgConfig1.height / 2) ||
-      (imgConfig2.projections.y.min.distance <= imgConfig1.height / 2 &&
-        imgConfig2.projections.y.max.distance >= imgConfig1.height / 2) ||
-      (imgConfig2.projections.y.min.distance >= -imgConfig1.height / 2 &&
-        imgConfig2.projections.y.max.distance <= imgConfig1.height / 2)
-        ? true
-        : false;
-
-    return imgConfig1.projections.x.is_collide &&
-      imgConfig1.projections.y.is_collide &&
-      imgConfig2.projections.x.is_collide &&
-      imgConfig2.projections.y.is_collide
-      ? true
-      : false;
-  }
-
-  radians(degrees) {
-    return (degrees * Math.PI) / 180;
-  }
-
-  degrees(radians) {
-    return (radians * 180) / Math.PI;
   }
 }
