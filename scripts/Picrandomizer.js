@@ -7,14 +7,14 @@ class Picrandomizer {
     repetition = false,
     rotation = true,
   }) {
-    this.errors.errorState = false;
-
     this.config.containerId = containerId.trim();
     this.config.imagesUrls = imagesUrls;
     this.config.dontTouch = dontTouch;
     this.config.howManyImages = howManyImages;
     this.config.repetition = repetition;
     this.config.rotation = rotation;
+
+    this.errors.errorState = false;
 
     this.setParent();
 
@@ -51,15 +51,12 @@ class Picrandomizer {
         .slice(0, this.config.howManyImages);
     }
 
-    this.images.imagesUrls.forEach((url) => {
-      let img = document.createElement("img");
-      img.src = url;
-      img.setAttribute("draggable", "false");
+    this.images.createDomElements();
 
-      this.images.images.push({
-        imgItself: img,
-        imgConfig: this.images.getConfigObject(),
-      });
+    window.addEventListener("resize", () => {
+      debugger;
+      this.container.size = this.container.getSize();
+      this.show();
     });
   }
 
@@ -76,12 +73,6 @@ class Picrandomizer {
         width: this.dom.offsetWidth,
         height: this.dom.offsetHeight,
       };
-    },
-
-    handlerResize() {
-      debugger; // TODO: test and maybe remake the method
-      this.parent.container.size = this.parent.container.getSize();
-      //here it was setImgsStyle (old version cycle)
     },
 
     setStyle() {
@@ -218,7 +209,6 @@ class Picrandomizer {
     },
 
     setProjections(imgConfig) {
-      debugger;
       let center_x = imgConfig.center.x;
       let center_y = imgConfig.center.y;
       let angle = imgConfig.rotation ? imgConfig.rotation : 0;
@@ -376,6 +366,19 @@ class Picrandomizer {
     imagesUrls: [],
     images: [],
 
+    createDomElements() {
+      this.imagesUrls.forEach((url) => {
+        let img = document.createElement("img");
+        img.src = url;
+        img.setAttribute("draggable", "false");
+
+        this.images.push({
+          imgItself: img,
+          imgConfig: this.getConfigObject(),
+        });
+      });
+    },
+
     getConfigObject() {
       return {
         center: { x: undefined, y: undefined },
@@ -412,7 +415,7 @@ class Picrandomizer {
     },
 
     async preload() {
-      for (let img of this.images.images) {
+      for (let img of this.images) {
         const image = new Image();
         const preloadImage = (src) =>
           new Promise((r) => {
@@ -548,7 +551,7 @@ class Picrandomizer {
     this.utils.parent = this;
   }
 
-  async show() {
+  show() {
     if (!this.errors.errorState) {
       for (let img of this.images.images) {
         if (this.config.dontTouch) {
@@ -562,10 +565,6 @@ class Picrandomizer {
           this.container.dom.appendChild(img.imgItself);
         }
       }
-      window.addEventListener(
-        "resize",
-        this.container.handlerResize.bind(this)
-      );
     } else {
       this.errors.logErrorMessages();
     }

@@ -129,6 +129,7 @@
       imagesUrls: imagesUrls,
       howManyImages: 4,
     });
+
     let bgpics2 = new Picrandomizer({
       containerId: "background2",
       imagesUrls: imagesUrls,
@@ -150,28 +151,35 @@
       repetition: true,
     });
 
-    // let bgpics5 = new Picrandomizer({
-    //   containerId: "background5",
-    //   imagesUrls: imagesUrls3,
-    //   dontTouch: true,
-    //   howManyImages: 10,
-    //   repetition: true,
-    // });
+    let bgpics5 = new Picrandomizer({
+      containerId: "background5",
+      imagesUrls: imagesUrls3,
+      dontTouch: true,
+      howManyImages: 10,
+      repetition: true,
+    });
 
-    // let bgpics6 = new Picrandomizer({
-    //   containerId: "background6",
-    //   imagesUrls: imagesUrls4,
-    //   howManyImages: 10,
-    //   repetition: true,
-    // });
+    let bgpics6 = new Picrandomizer({
+      containerId: "background6",
+      imagesUrls: imagesUrls4,
+      howManyImages: 10,
+      repetition: true,
+    });
+
+    bgpics1.preload();
+    bgpics2.preload();
+    bgpics3.preload();
+    bgpics4.preload();
+    bgpics5.preload();
+    bgpics6.preload();
 
     window.onload = () => {
       bgpics1.show();
       bgpics2.show();
       bgpics3.show();
       bgpics4.show();
-      // bgpics5.show();
-      // bgpics6.show();
+      bgpics5.show();
+      bgpics6.show();
     };
   </script>
 </html>
