@@ -1,3 +1,5 @@
+"use strict";
+
 class Picrandomizer {
   constructor({
     containerId,
