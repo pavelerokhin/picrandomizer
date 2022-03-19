@@ -570,3 +570,5 @@ class Picrandomizer {
     }
   }
 }
+
+module.exports = Picrandomizer;
