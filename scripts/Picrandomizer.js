@@ -105,7 +105,7 @@ class Picrandomizer {
     errorMessages: [],
 
     containerExistsInDOM(containerId) {
-      if (!containerId || containerId.trim().length) {
+      if (!containerId || !containerId.trim().length) {
         this.errorMessages.push("no Picrandomizer's container has been set");
         this.errorState = true;
       }
