@@ -9,6 +9,24 @@ class Picrandomizer {
     repetition = false,
     rotation = true,
   }) {
+    this.setParent();
+
+    this.errors.errorState = false;
+
+    // tests
+    this.errors.containerExistsInDOM(containerId);
+    this.errors.imagesUrlsIsNotEmpty(imagesUrls);
+    this.errors.isItPossibleToPrimtImagesWithNoRepetition(
+      imagesUrls,
+      howManyImages,
+      repetition
+    );
+    if (this.errors.errorState) {
+      this.errors.logErrorMessages();
+      return;
+    }
+
+    // intiialization
     this.config.containerId = containerId.trim();
     this.config.imagesUrls = imagesUrls;
     this.config.dontTouch = dontTouch;
@@ -16,20 +34,6 @@ class Picrandomizer {
     this.config.repetition = repetition;
     this.config.rotation = rotation;
 
-    this.errors.errorState = false;
-
-    this.setParent();
-
-    // tests
-    this.controls.containerExistsInDOM();
-    this.controls.imagesUrlsIsNotEmpty();
-    this.controls.isItPossibleToPrimtImagesWithNoRepetition();
-    if (this.errors.errorState) {
-      this.errors.logErrorMessages();
-      return;
-    }
-
-    // intiialization
     this.container.dom = document.getElementById(containerId);
     this.container.size = this.container.getSize();
 
@@ -85,52 +89,6 @@ class Picrandomizer {
     },
   };
 
-  controls = {
-    parent: undefined,
-
-    containerExistsInDOM() {
-      if (this.parent.config.containerId.length == 0) {
-        this.parent.errors.errorMessages.push(
-          "no Picrandomizer's container has been set"
-        );
-        this.parent.errors.errorState = true;
-      }
-
-      return;
-    },
-
-    imagesUrlsIsNotEmpty() {
-      if (this.parent.config.imagesUrls.length == 0) {
-        this.parent.errors.errorMessages.push(
-          "no Picrandomizer's images urls have been set"
-        );
-        this.parent.errors.errorState = true;
-      }
-
-      return;
-    },
-
-    isItPossibleToPrimtImagesWithNoRepetition() {
-      let imagesN =
-        this.parent.config.howManyImages >= 0
-          ? this.parent.config.howManyImages
-          : urlsN;
-      let urlsN = this.parent.config.imagesUrls.length;
-
-      if (
-        imagesN > this.parent.config.imagesUrls.length &&
-        !this.parent.config.repetition
-      ) {
-        this.parent.errors.errorMessages.push(
-          `can't take ${imagesN} from the pictures provided (${urlsN} images) without repetition`
-        );
-        this.parent.errors.errorState = true;
-      }
-
-      return;
-    },
-  };
-
   config = {
     containerId: undefined,
     imagesUrls: [],
@@ -146,11 +104,52 @@ class Picrandomizer {
     errorState: false,
     errorMessages: [],
 
+    containerExistsInDOM(containerId) {
+      if (!containerId || containerId.trim().length) {
+        this.errorMessages.push("no Picrandomizer's container has been set");
+        this.errorState = true;
+      }
+
+      return;
+    },
+
+    imagesUrlsIsNotEmpty(imagesUrls) {
+      if (!imagesUrls || (imagesUrls && imagesUrls.length == 0)) {
+        this.errorMessages.push("no Picrandomizer's images urls have been set");
+        this.errorState = true;
+      }
+
+      return;
+    },
+
+    isItPossibleToPrimtImagesWithNoRepetition(
+      imagesUrls,
+      howManyImages,
+      repetition
+    ) {
+      if (!imagesUrls) {
+        return;
+      }
+
+      let urlsN = imagesUrls.length;
+
+      let imagesN = howManyImages >= 0 ? howManyImages : urlsN;
+
+      if (imagesN > urlsN && !repetition) {
+        this.errorMessages.push(
+          `can't take ${imagesN} from the pictures provided (${urlsN} images) without repetition`
+        );
+        this.errorState = true;
+      }
+
+      return;
+    },
+
     logErrorMessages() {
       if (this.errorState) {
         console.error("Prirandomazer is in error state!");
-        errorMessages.forEach((e, i) => {
-          console.error(i, ":", e);
+        this.errorMessages.forEach((e, i) => {
+          console.error(`${i}: ${e}`);
         });
       }
     },
@@ -546,7 +545,6 @@ class Picrandomizer {
   setParent() {
     // pass the link to the parent instance
     this.container.parent = this;
-    this.controls.parent = this;
     this.config.parent = this;
     this.errors.parent = this;
     this.images.parent = this;
