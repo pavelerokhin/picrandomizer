@@ -9,7 +9,7 @@ class Picrandomizer {
     repetition = false,
     rotation = true,
   }) {
-    this.setParent();
+    this.setParent(); // to all nested classes
 
     this.errors.errorState = false;
 
@@ -27,13 +27,14 @@ class Picrandomizer {
     }
 
     // intiialization
-    this.config.containerId = containerId.trim();
-    this.config.imagesUrls = imagesUrls;
-    this.config.dontTouch = dontTouch;
-    this.config.howManyImages = howManyImages;
-    this.config.repetition = repetition;
-    this.config.rotation = rotation;
-
+    this.config.set(
+      containerId,
+      imagesUrls,
+      dontTouch,
+      howManyImages,
+      repetition,
+      rotation
+    );
     this.container.dom = document.getElementById(containerId);
     this.container.size = this.container.getSize();
 
@@ -58,9 +59,9 @@ class Picrandomizer {
     }
 
     this.images.createDomElements();
+    this.images.preload();
 
     window.addEventListener("resize", () => {
-      debugger;
       this.container.size = this.container.getSize();
       this.show();
     });
@@ -84,7 +85,6 @@ class Picrandomizer {
     setStyle() {
       this.dom.style.cssText = `
       overflow: hidden;
-      position: relative;
     `;
     },
   };
@@ -96,6 +96,22 @@ class Picrandomizer {
     howManyImages: -1,
     repetition: false,
     rotation: true,
+
+    set(
+      containerId,
+      imagesUrls,
+      dontTouch,
+      howManyImages,
+      repetition,
+      rotation
+    ) {
+      this.containerId = containerId.trim();
+      this.imagesUrls = imagesUrls;
+      this.dontTouch = dontTouch;
+      this.howManyImages = howManyImages;
+      this.repetition = repetition;
+      this.rotation = rotation;
+    },
   };
 
   errors = {
@@ -538,10 +554,6 @@ class Picrandomizer {
     },
   };
 
-  async preload() {
-    await this.images.preload();
-  }
-
   setParent() {
     // pass the link to the parent instance
     this.container.parent = this;
@@ -554,6 +566,12 @@ class Picrandomizer {
   show() {
     if (!this.errors.errorState) {
       for (let img of this.images.images) {
+        if (!img.imgConfig.height || !img.imgConfig.width) {
+          console.warn(
+            `probably ${img.imgItself.src} has not been preloaded, it could spoil the randomization`
+          );
+        }
+
         if (this.config.dontTouch) {
           this.images.setPositionNotTouchingAnyone(img.imgConfig);
         } else {
