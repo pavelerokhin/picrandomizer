@@ -85,6 +85,7 @@ class Picrandomizer {
     setStyle() {
       this.dom.style.cssText = `
       overflow: hidden;
+      position: relative;
     `;
     },
   };
