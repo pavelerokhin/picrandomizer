@@ -9,7 +9,7 @@ class Picrandomizer {
     repetition = false,
     rotation = {
       needed: true,
-      rotationType: "continues",
+      rotationType: "cont",
       rotationRange: [0, 359],
     },
   }) {
@@ -141,7 +141,7 @@ class Picrandomizer {
           return;
         }
 
-        rotationTypesAllowed = ["continuous", "discrete"];
+        rotationTypesAllowed = ["cont", "disc"];
         if (rotationTypesAllowed.indexOf(rotation.rotationType) == -1) {
           this.errorMessages.push(
             `rotation type requested ${rotation.rotationType} is not allowed; allowed types are: ${rotationTypesAllowed}`
@@ -158,7 +158,7 @@ class Picrandomizer {
 
         if (
           rotation.rotationRange.length > 2 &&
-          rotation.rotationType == "continuous"
+          rotation.rotationType == "cont"
         ) {
           this.errorMessages.push(
             `if the rotation type is continuous, only two limits has to be defined: min angle and max angle in deg`
@@ -470,8 +470,14 @@ class Picrandomizer {
       return { left: left, top: top };
     },
 
-    getRandomRotation() {
-      return this.parent.utils.rnd(365);
+    getRandomRotation(rotationConfig) {
+      if (rotationConfig.rotationType == "cont") {
+        return this.parent.utils.rnd(rotationConfig.rotationRange);
+      }
+
+      return rotationConfig.rotationRange[
+        this.parent.utils.rnd(rotationConfig.rotationRange.length)
+      ];
     },
 
     getSize(img) {
@@ -536,8 +542,9 @@ class Picrandomizer {
         y: imgConfig.corners[0].y + imgConfig.height / 2,
       };
 
-      if (this.parent.config.rotation.needed) {
-        imgConfig.rotation = this.getRandomRotation();
+      let rotationConfig = this.parent.config.rotation;
+      if (rotationConfig.needed) {
+        imgConfig.rotation = this.getRandomRotation(rotationConfig);
       }
     },
 
@@ -586,9 +593,12 @@ class Picrandomizer {
       return (degrees * Math.PI) / 180;
     },
 
-    // random number in scope: [0,a)
+    // random number in scope: [0,a) if a is a number, otherwise [x1,x2), if a is an array [x1,x2]
     rnd(a) {
-      return Math.floor(Math.random() * a);
+      if (typeof a === "number") {
+        return Math.floor(Math.random() * a);
+      }
+      return Math.floor(Math.random() * a[1] + a[0]);
     },
 
     shuffleArray(array) {
