@@ -460,14 +460,10 @@ class Picrandomizer {
     },
 
     getRandomPosition(imgConfig) {
-      let left = this.parent.utils.rnd(
-        this.parent.container.size.width - imgConfig.width
-      );
-      let top = this.parent.utils.rnd(
-        this.parent.container.size.height - imgConfig.height
-      );
+      let left = this.parent.utils.rnd(this.parent.container.size.width);
+      let top = this.parent.utils.rnd(this.parent.container.size.height);
 
-      return { left: left, top: top };
+      return { centerX: left, centerY: top };
     },
 
     getRandomRotation(rotationConfig) {
@@ -522,25 +518,31 @@ class Picrandomizer {
     },
 
     setPosition(imgConfig, randomPosition) {
-      imgConfig.corners = [];
-      imgConfig.corners.push({ x: randomPosition.left, y: randomPosition.top });
-      imgConfig.corners.push({
-        x: randomPosition.left + imgConfig.width,
-        y: randomPosition.top,
-      });
-      imgConfig.corners.push({
-        x: randomPosition.left + imgConfig.width,
-        y: randomPosition.top + imgConfig.height,
-      });
-      imgConfig.corners.push({
-        x: randomPosition.left,
-        y: randomPosition.top + imgConfig.height,
-      });
-
       imgConfig.center = {
-        x: imgConfig.corners[0].x + imgConfig.width / 2,
-        y: imgConfig.corners[0].y + imgConfig.height / 2,
+        x: randomPosition.centerX,
+        y: randomPosition.centerY,
       };
+
+      let halfHeight = imgConfig.height / 2;
+      let halfWidth = imgConfig.width / 2;
+
+      imgConfig.corners = [];
+      imgConfig.corners.push({
+        x: imgConfig.center.x - halfWidth,
+        y: imgConfig.center.y - halfHeight,
+      });
+      imgConfig.corners.push({
+        x: imgConfig.center.x + halfWidth,
+        y: imgConfig.center.y - halfHeight,
+      });
+      imgConfig.corners.push({
+        x: imgConfig.center.x + halfWidth,
+        y: imgConfig.center.y + halfHeight,
+      });
+      imgConfig.corners.push({
+        x: imgConfig.center.x - halfWidth,
+        y: imgConfig.center.y + halfHeight,
+      });
 
       let rotationConfig = this.parent.config.rotation;
       if (rotationConfig.needed) {
