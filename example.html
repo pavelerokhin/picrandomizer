@@ -36,6 +36,12 @@
       width: 100%;
     }
 
+    .background .axis {
+      bottom: 10px;
+      left: 10px;
+      position: absolute;
+    }
+
     #background1 {
       background-color: rgb(28, 28, 28);
     }
@@ -89,20 +95,37 @@
   <body>
     <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation, continious [0, 360) deg</h1>
+      <img
+        class="axis"
+        src="/etc/alldirections.png"
+        alt="all possible directions"
+        srcset=""
+      />
     </section>
     <section id="background2" class="background">
-      <div></div>
       <h1>Pic randomizer tool. No rotation</h1>
+      <img class="axis" src="/etc/horizontal.png" alt="horizontal" srcset="" />
     </section>
     <section id="background2_1" class="background">
-      <div></div>
       <h1>Pic randomizer tool. Rotation, continious [45, 90) deg</h1>
+      <img
+        class="axis"
+        src="/etc/45-90.png"
+        alt="axis from 45 to 90 deg"
+        srcset=""
+      />
     </section>
     <section id="background2_2" class="background">
       <div></div>
       <h1>
         Pic randomizer tool. Rotation, discrete {0, 90, 180, 270} deg states
       </h1>
+      <img
+        class="axis"
+        src="/etc/allaxis.png"
+        alt="axis: 0, 90, 280,270 deg"
+        srcset=""
+      />
     </section>
     <section id="background3" class="background">
       <h1>Pic randomizer tool. Repetition of 2 images</h1>
