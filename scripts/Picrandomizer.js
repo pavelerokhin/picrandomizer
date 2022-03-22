@@ -108,9 +108,13 @@ class Picrandomizer {
     dontTouch: false,
     howManyImages: -1,
     repetition: false,
+    resize: {
+      needed: false,
+    },
     rotation: {
       needed: true,
-      range: (0, 345),
+      type: "cont",
+      range: [0, 345],
     },
 
     set(
@@ -119,6 +123,7 @@ class Picrandomizer {
       dontTouch,
       howManyImages,
       repetition,
+      resize,
       rotation
     ) {
       this.containerId = containerId.trim();
@@ -126,18 +131,16 @@ class Picrandomizer {
       this.dontTouch = dontTouch;
       this.howManyImages = howManyImages;
       this.repetition = repetition;
+      this.resize = resize;
       this.rotation = rotation;
     },
   };
 
   errors = {
     parent: undefined,
-
     errorState: false,
     errorMessages: [],
-
-    typesAllowed = ["cont", "disc"],
-
+    typesAllowed: ["cont", "disc"],
     checkResize(resize) {
       if (resize.neened) {
         // check resize type
@@ -148,7 +151,7 @@ class Picrandomizer {
           this.errorState = true;
           return;
         }
-        
+
         if (this.typesAllowed.indexOf(resize.type) == -1) {
           this.errorMessages.push(
             `rotation type requested ${resize.type} is not allowed; allowed types are: ${this.typesAllowed}`
@@ -183,7 +186,7 @@ class Picrandomizer {
           this.errorState = true;
           return;
         }
-        
+
         if (this.typesAllowed.indexOf(rotation.type) == -1) {
           this.errorMessages.push(
             `rotation type requested ${rotation.type} is not allowed; allowed types are: ${this.typesAllowed}`
@@ -516,9 +519,25 @@ class Picrandomizer {
     },
 
     getSize(img) {
+      let resizeConfig = this.parent.config.resize;
+      let resizeCoeffixient = 1;
+      if (!resizeConfig.needed) {
+        if (resizeConfig.type == "cont") {
+          resizeCoeffixient = this.parent.utils.rnd(
+            resizeConfig.range[0],
+            resizeConfig[1]
+          );
+        } else {
+          resizeCoeffixient =
+            resizeConfig.range[
+              this.parent.utils.rnd(resizeConfig.range.length)
+            ];
+        }
+      }
+
       return {
-        height: img.width,
-        width: img.height,
+        height: img.width * resizeCoeffixient,
+        width: img.height * resizeCoeffixient,
       };
     },
 
@@ -547,8 +566,13 @@ class Picrandomizer {
         position: absolute;
         top: ${img.imgConfig.corners[0].y}px;
         user-select: none;
-        z-index: 0;
-      `;
+        z-index: 0;`;
+
+        // TODO: control
+        if (this.parent.config.resize) {
+          img.imgItself.style.height = `${img.imgConfig.size.height}px`;
+          img.imgItself.style.width = `${img.imgConfig.size.width}px`;
+        }
 
         if (this.parent.config.rotation) {
           img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
@@ -583,25 +607,27 @@ class Picrandomizer {
         y: imgConfig.center.y + halfHeight,
       });
 
+      debugger;
       let rotationConfig = this.parent.config.rotation;
-      if (rotationConfig.needed) {
+      if (rotationConfig && rotationConfig.needed) {
         imgConfig.rotation = this.getRandomRotation(rotationConfig);
       }
     },
 
     setPositionNotTouchingAnyone(imgConfig) {
-      let tryCount = 0;
+      let attemptsCount = 0;
       let randomPosition = this.getRandomPosition(imgConfig);
       this.setPosition(imgConfig, randomPosition);
       this.parent.geometry.setProjections(imgConfig);
 
-      while (this.touchesAnyone(imgConfig) && tryCount < 10) {
+      // TODO: control this logic, looks not working
+      while (this.touchesAnyone(imgConfig) && attemptsCount < 10) {
         let randomPosition = this.getRandomPosition(imgConfig);
         this.setPosition(imgConfig, randomPosition);
         this.parent.geometry.setProjections(imgConfig);
-        tryCount++;
+        attemptsCount++;
       }
-      if (tryCount >= 10) {
+      if (attemptsCount >= 10) {
         imgConfig.isVisible = false;
         imgConfig.corners = [];
         imgConfig.rotation = undefined;
