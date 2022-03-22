@@ -134,6 +134,10 @@ class Picrandomizer {
       this.repetition = repetition;
       this.resize = resize;
       this.rotation = rotation;
+
+      if (this.resize && this.resize.range) {
+        this.resize.range = this.resize.range.map((x) => (x += 100));
+      }
     },
   };
 
@@ -521,7 +525,7 @@ class Picrandomizer {
 
     getSize(img) {
       let resizeConfig = this.parent.config.resize;
-      let resizeCoeffixient = 0;
+      let resizeCoeffixient = 1;
       if (resizeConfig.needed) {
         if (resizeConfig.type == "cont") {
           resizeCoeffixient = this.parent.utils.rnd(resizeConfig.range) / 100;
@@ -534,8 +538,8 @@ class Picrandomizer {
       }
 
       return {
-        height: Math.floor(img.height + img.height * resizeCoeffixient),
-        width: Math.floor(img.width + img.width * resizeCoeffixient),
+        height: Math.floor(img.height * resizeCoeffixient),
+        width: Math.floor(img.width * resizeCoeffixient),
       };
     },
 
@@ -662,7 +666,7 @@ class Picrandomizer {
       if (typeof a === "number") {
         return Math.floor(Math.random() * a);
       }
-      return Math.floor(Math.random() * a[1] + a[0]);
+      return Math.floor(Math.random() * (a[1] - a[0]) + a[0]);
     },
 
     shuffleArray(array) {
