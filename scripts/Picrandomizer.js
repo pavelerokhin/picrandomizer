@@ -45,6 +45,7 @@ class Picrandomizer {
       dontTouch,
       howManyImages,
       repetition,
+      resize,
       rotation
     );
     this.container.dom = document.getElementById(containerId);
@@ -520,24 +521,21 @@ class Picrandomizer {
 
     getSize(img) {
       let resizeConfig = this.parent.config.resize;
-      let resizeCoeffixient = 1;
-      if (!resizeConfig.needed) {
+      let resizeCoeffixient = 0;
+      if (resizeConfig.needed) {
         if (resizeConfig.type == "cont") {
-          resizeCoeffixient = this.parent.utils.rnd(
-            resizeConfig.range[0],
-            resizeConfig[1]
-          );
+          resizeCoeffixient = this.parent.utils.rnd(resizeConfig.range) / 100;
         } else {
           resizeCoeffixient =
             resizeConfig.range[
               this.parent.utils.rnd(resizeConfig.range.length)
-            ];
+            ] / 100;
         }
       }
 
       return {
-        height: img.width * resizeCoeffixient,
-        width: img.height * resizeCoeffixient,
+        height: Math.floor(img.height + img.height * resizeCoeffixient),
+        width: Math.floor(img.width + img.width * resizeCoeffixient),
       };
     },
 
@@ -568,10 +566,9 @@ class Picrandomizer {
         user-select: none;
         z-index: 0;`;
 
-        // TODO: control
         if (this.parent.config.resize) {
-          img.imgItself.style.height = `${img.imgConfig.size.height}px`;
-          img.imgItself.style.width = `${img.imgConfig.size.width}px`;
+          img.imgItself.style.height = `${img.imgConfig.height}px`;
+          img.imgItself.style.width = `${img.imgConfig.width}px`;
         }
 
         if (this.parent.config.rotation) {
@@ -607,7 +604,6 @@ class Picrandomizer {
         y: imgConfig.center.y + halfHeight,
       });
 
-      debugger;
       let rotationConfig = this.parent.config.rotation;
       if (rotationConfig && rotationConfig.needed) {
         imgConfig.rotation = this.getRandomRotation(rotationConfig);
@@ -618,10 +614,11 @@ class Picrandomizer {
       let attemptsCount = 0;
       let randomPosition = this.getRandomPosition(imgConfig);
       this.setPosition(imgConfig, randomPosition);
-      this.parent.geometry.setProjections(imgConfig);
 
       // TODO: control this logic, looks not working
       while (this.touchesAnyone(imgConfig) && attemptsCount < 10) {
+        this.parent.geometry.setProjections(imgConfig);
+
         let randomPosition = this.getRandomPosition(imgConfig);
         this.setPosition(imgConfig, randomPosition);
         this.parent.geometry.setProjections(imgConfig);
