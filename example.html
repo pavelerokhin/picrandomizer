@@ -36,6 +36,51 @@
       width: 100%;
     }
 
+    .background .axis {
+      bottom: 10px;
+      left: 10px;
+      position: absolute;
+    }
+
+    .background .sizes {
+      bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      left: 10px;
+      position: absolute;
+      z-index: 1000;
+    }
+
+    .background .sizes .img-container {
+      border: 4px solid red;
+      margin-top: 10px;
+      position: relative;
+      width: min-content;
+    }
+
+    .background .sizes .img-container img {
+      opacity: 0.2;
+    }
+
+    .background .sizes .img-container .img-label {
+      color: red;
+      font-size: 25px;
+      font-family: Helvetica;
+      left: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .background .sizes:hover {
+      opacity: 0;
+    }
+
+    .text-highlight {
+      color: black !important;
+      text-shadow: rgb(241, 241, 241) 1px 0 10px;
+    }
+
     #background1 {
       background-color: rgb(28, 28, 28);
     }
@@ -87,114 +132,195 @@
     } */
   </style>
   <body>
-    <section id="background1" class="background">
+    <!-- <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation, continious [0, 360) deg</h1>
+      <img
+        class="axis"
+        src="/etc/alldirections.png"
+        alt="all possible directions"
+        srcset=""
+      />
     </section>
     <section id="background2" class="background">
-      <div></div>
       <h1>Pic randomizer tool. No rotation</h1>
+      <img class="axis" src="/etc/horizontal.png" alt="horizontal" srcset="" />
     </section>
     <section id="background2_1" class="background">
-      <div></div>
       <h1>Pic randomizer tool. Rotation, continious [45, 90) deg</h1>
+      <img
+        class="axis"
+        src="/etc/45-90.png"
+        alt="axis from 45 to 90 deg"
+        srcset=""
+      />
     </section>
     <section id="background2_2" class="background">
       <div></div>
       <h1>
         Pic randomizer tool. Rotation, discrete {0, 90, 180, 270} deg states
       </h1>
+      <img
+        class="axis"
+        src="/etc/allaxis.png"
+        alt="axis: 0, 90, 280,270 deg"
+        srcset=""
+      />
     </section>
     <section id="background3" class="background">
       <h1>Pic randomizer tool. Repetition of 2 images</h1>
     </section>
     <section id="background4" class="background long">
       <h1>Pic randomizer tool. Long screen</h1>
-    </section>
+    </section> -->
     <section id="background5" class="background">
       <h1>Pic randomizer tool. Size parameter, continious [-50, 50]%</h1>
+      <div class="sizes">
+        <div class="img-container">
+          <img
+            alt="size small"
+            src="/etc/gallery/earth.png"
+            width="284"
+            height="53"
+          />
+          <span class="img-label">-50%</span>
+        </div>
+
+        <div class="img-container">
+          <img
+            alt="size original"
+            src="/etc/gallery/earth.png"
+            width="567"
+            height="105"
+          />
+          <span class="img-label text-highlight">original</span>
+        </div>
+
+        <div class="img-container">
+          <img
+            alt="size big"
+            src="/etc/gallery/earth.png"
+            width="851"
+            height="158"
+          />
+          <span class="img-label">50%</span>
+        </div>
+      </div>
     </section>
     <section id="background5_1" class="background">
-      <h1>Pic randomizer tool. Size parameter, discrete {0, 10, 20}% states</h1>
+      <h1>
+        Pic randomizer tool. Size parameter, discrete {0, 50, 100}% states
+      </h1>
+      <div class="sizes">
+        <div class="img-container">
+          <img
+            src="/etc/gallery/earth.png"
+            alt="size original"
+            width="567"
+            height="105"
+          />
+          <span class="img-label text-highlight">original (0%)</span>
+        </div>
+
+        <div class="img-container">
+          <img
+            src="/etc/gallery/earth.png"
+            alt="size big"
+            width="851"
+            height="158"
+          />
+          <span class="img-label">50%</span>
+        </div>
+
+        <div class="img-container">
+          <img
+            src="/etc/gallery/earth.png"
+            alt="size bigger"
+            width="1134"
+            height="210"
+          />
+          <span class="img-label">100%</span>
+        </div>
+      </div>
     </section>
   </body>
 
   <script src="/scripts/Picrandomizer.js"></script>
   <script>
-    let imagesUrls = [
-      "/etc/gallery/1.png",
-      "/etc/gallery/2.png",
-      "/etc/gallery/3.png",
-      "/etc/gallery/4.png",
-      "/etc/gallery/5.png",
-      "/etc/gallery/6.png",
-      "/etc/gallery/7.png",
-      "/etc/gallery/8.png",
-      "/etc/gallery/9.png",
-      "/etc/gallery/10.png",
-      "/etc/gallery/11.png",
-    ];
+    // let imagesUrls = [
+    //   "/etc/gallery/1.png",
+    //   "/etc/gallery/2.png",
+    //   "/etc/gallery/3.png",
+    //   "/etc/gallery/4.png",
+    //   "/etc/gallery/5.png",
+    //   "/etc/gallery/6.png",
+    //   "/etc/gallery/7.png",
+    //   "/etc/gallery/8.png",
+    //   "/etc/gallery/9.png",
+    //   "/etc/gallery/10.png",
+    //   "/etc/gallery/11.png",
+    // ];
 
-    let imagesUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
+    // let imagesUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
 
-    let imagesUrls3 = ["/etc/gallery/6.png"];
+    // let imagesUrls3 = ["/etc/gallery/6.png"];
 
-    let imagesUrls4 = ["/etc/gallery/8.png"];
+    // let imagesUrls4 = ["/etc/gallery/8.png"];
 
-    let imagesUrls5 = ["/etc/gallery/earth_line.png"];
+    // let imagesUrls5 = ["/etc/gallery/earth_line.png"];
 
     let imagesUrls6 = ["/etc/gallery/earth.png"];
 
-    let bgpics1 = new Picrandomizer({
-      containerId: "background1",
-      imagesUrls: imagesUrls,
-      howManyImages: 4,
-    });
+    // let bgpics1 = new Picrandomizer({
+    //   containerId: "background1",
+    //   imagesUrls: imagesUrls,
+    //   howManyImages: 4,
+    // });
 
-    let bgpics2 = new Picrandomizer({
-      containerId: "background2",
-      imagesUrls: imagesUrls5,
-      howManyImages: 10,
-      repetition: true,
-      rotation: { needed: false },
-    });
+    // let bgpics2 = new Picrandomizer({
+    //   containerId: "background2",
+    //   imagesUrls: imagesUrls5,
+    //   howManyImages: 10,
+    //   repetition: true,
+    //   rotation: { needed: false },
+    // });
 
-    let bgpics2_1 = new Picrandomizer({
-      containerId: "background2_1",
-      imagesUrls: imagesUrls5,
-      howManyImages: 10,
-      repetition: true,
-      rotation: {
-        needed: true,
-        type: "cont",
-        range: [45, 90],
-      },
-    });
+    // let bgpics2_1 = new Picrandomizer({
+    //   containerId: "background2_1",
+    //   imagesUrls: imagesUrls5,
+    //   howManyImages: 10,
+    //   repetition: true,
+    //   rotation: {
+    //     needed: true,
+    //     type: "cont",
+    //     range: [45, 90],
+    //   },
+    // });
 
-    let bgpics2_2 = new Picrandomizer({
-      containerId: "background2_2",
-      imagesUrls: imagesUrls5,
-      howManyImages: 10,
-      repetition: true,
-      rotation: {
-        needed: true,
-        type: "disc",
-        range: [0, 90, 180, 270],
-      },
-    });
+    // let bgpics2_2 = new Picrandomizer({
+    //   containerId: "background2_2",
+    //   imagesUrls: imagesUrls5,
+    //   howManyImages: 10,
+    //   repetition: true,
+    //   rotation: {
+    //     needed: true,
+    //     type: "disc",
+    //     range: [0, 90, 180, 270],
+    //   },
+    // });
 
-    let bgpics3 = new Picrandomizer({
-      containerId: "background3",
-      imagesUrls: imagesUrls2,
-      howManyImages: 10,
-      repetition: true,
-    });
+    // let bgpics3 = new Picrandomizer({
+    //   containerId: "background3",
+    //   imagesUrls: imagesUrls2,
+    //   howManyImages: 10,
+    //   repetition: true,
+    // });
 
-    let bgpics4 = new Picrandomizer({
-      containerId: "background4",
-      imagesUrls: imagesUrls,
-      howManyImages: 50,
-      repetition: true,
-    });
+    // let bgpics4 = new Picrandomizer({
+    //   containerId: "background4",
+    //   imagesUrls: imagesUrls,
+    //   howManyImages: 50,
+    //   repetition: true,
+    // });
 
     let bgpics5 = new Picrandomizer({
       containerId: "background5",
@@ -209,18 +335,18 @@
       repetition: true,
     });
 
-    let bgpics5_1 = new Picrandomizer({
-      containerId: "background5_1",
-      imagesUrls: imagesUrls6,
-      howManyImages: 10,
-      resize: {
-        needed: true,
-        type: "disc",
-        range: [0, 10, 50, 100],
-      },
-      rotation: false,
-      repetition: true,
-    });
+    // let bgpics5_1 = new Picrandomizer({
+    //   containerId: "background5_1",
+    //   imagesUrls: imagesUrls6,
+    //   howManyImages: 10,
+    //   resize: {
+    //     needed: true,
+    //     type: "disc",
+    //     range: [0, 10, 50, 100],
+    //   },
+    //   rotation: false,
+    //   repetition: true,
+    // });
 
     // let bgpics5 = new Picrandomizer({
     //   containerId: "background5",
@@ -238,14 +364,14 @@
     // });
 
     window.onload = () => {
-      bgpics1.show();
-      bgpics2.show();
-      bgpics2_1.show();
-      bgpics2_2.show();
-      bgpics3.show();
-      bgpics4.show();
+      // bgpics1.show();
+      // bgpics2.show();
+      // bgpics2_1.show();
+      // bgpics2_2.show();
+      // bgpics3.show();
+      // bgpics4.show();
       bgpics5.show();
-      bgpics5_1.show();
+      // bgpics5_1.show();
     };
   </script>
 </html>
