@@ -65,29 +65,26 @@
       text-shadow: 0 1px 0 white;
     }
 
-    #background5 {
+    #background5,
+    #background5_1 {
       background-color: rgb(203, 203, 203);
-      float: left;
-      height: 50vh;
-      width: 40%;
+      border: 1px solid red;
     }
 
-    #background5 h1 {
+    #background5 h1,
+    #background5_1 h1 {
       color: rgb(107, 107, 107);
       text-shadow: 1px 1px 1px rgb(255, 0, 0);
     }
 
-    #background6 {
+    /* #background6 {
       background-color: rgb(234, 232, 232);
-      float: right;
-      height: 50vh;
-      width: 60%;
     }
 
     #background6 h1 {
       color: rgb(107, 107, 107);
       text-shadow: 1px 1px 1px rgb(255, 0, 0);
-    }
+    } */
   </style>
   <body>
     <section id="background1" class="background">
@@ -113,11 +110,11 @@
     <section id="background4" class="background long">
       <h1>Pic randomizer tool. Long screen</h1>
     </section>
-    <section id="background5" class="background long">
-      <h1>Pic randomizer tool. All images inside are not touching</h1>
+    <section id="background5" class="background">
+      <h1>Pic randomizer tool. Size parameter, continious [-50, 50]%</h1>
     </section>
-    <section id="background6" class="background long">
-      <h1>Pic randomizer tool. Container covered by images</h1>
+    <section id="background5_1" class="background">
+      <h1>Pic randomizer tool. Size parameter, discrete {0, 10, 20}% states</h1>
     </section>
   </body>
 
@@ -145,6 +142,8 @@
 
     let imagesUrls5 = ["/etc/gallery/earth_line.png"];
 
+    let imagesUrls6 = ["/etc/gallery/earth.png"];
+
     let bgpics1 = new Picrandomizer({
       containerId: "background1",
       imagesUrls: imagesUrls,
@@ -164,7 +163,11 @@
       imagesUrls: imagesUrls5,
       howManyImages: 10,
       repetition: true,
-      rotation: { needed: true, rotationType: "cont", rotationRange: [45, 90] },
+      rotation: {
+        needed: true,
+        type: "cont",
+        range: [45, 90],
+      },
     });
 
     let bgpics2_2 = new Picrandomizer({
@@ -174,8 +177,8 @@
       repetition: true,
       rotation: {
         needed: true,
-        rotationType: "disc",
-        rotationRange: [0, 90, 180, 270],
+        type: "disc",
+        range: [0, 90, 180, 270],
       },
     });
 
@@ -195,18 +198,44 @@
 
     let bgpics5 = new Picrandomizer({
       containerId: "background5",
-      imagesUrls: imagesUrls3,
-      dontTouch: true,
+      imagesUrls: imagesUrls6,
       howManyImages: 10,
+      resize: {
+        needed: true,
+        type: "cont",
+        range: [-50, 50],
+      },
+      rotation: false,
       repetition: true,
     });
 
-    let bgpics6 = new Picrandomizer({
-      containerId: "background6",
-      imagesUrls: imagesUrls4,
+    let bgpics5_1 = new Picrandomizer({
+      containerId: "background5_1",
+      imagesUrls: imagesUrls6,
       howManyImages: 10,
+      resize: {
+        needed: true,
+        type: "disc",
+        range: [0, 10, 50, 100],
+      },
+      rotation: false,
       repetition: true,
     });
+
+    // let bgpics5 = new Picrandomizer({
+    //   containerId: "background5",
+    //   imagesUrls: imagesUrls3,
+    //   dontTouch: true,
+    //   howManyImages: 10,
+    //   repetition: true,
+    // });
+
+    // let bgpics6 = new Picrandomizer({
+    //   containerId: "background6",
+    //   imagesUrls: imagesUrls4,
+    //   howManyImages: 10,
+    //   repetition: true,
+    // });
 
     window.onload = () => {
       bgpics1.show();
@@ -216,7 +245,7 @@
       bgpics3.show();
       bgpics4.show();
       bgpics5.show();
-      bgpics6.show();
+      bgpics5_1.show();
     };
   </script>
 </html>

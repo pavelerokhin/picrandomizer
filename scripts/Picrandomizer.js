@@ -7,10 +7,15 @@ class Picrandomizer {
     dontTouch = false,
     howManyImages = -1,
     repetition = false,
+    resize = {
+      needed: false,
+      type: "cont",
+      range: [-10, 10],
+    },
     rotation = {
       needed: true,
-      rotationType: "cont",
-      rotationRange: [0, 359],
+      type: "cont",
+      range: [0, 359],
     },
   }) {
     this.setParent(); // to all nested classes
@@ -26,6 +31,7 @@ class Picrandomizer {
       repetition
     );
     this.errors.checkRotation(rotation);
+    this.errors.checkResize(resize);
 
     if (this.errors.errorState) {
       this.errors.logErrorMessages();
@@ -39,6 +45,7 @@ class Picrandomizer {
       dontTouch,
       howManyImages,
       repetition,
+      resize,
       rotation
     );
     this.container.dom = document.getElementById(containerId);
@@ -102,9 +109,13 @@ class Picrandomizer {
     dontTouch: false,
     howManyImages: -1,
     repetition: false,
+    resize: {
+      needed: false,
+    },
     rotation: {
       needed: true,
-      range: (0, 345),
+      type: "cont",
+      range: [0, 345],
     },
 
     set(
@@ -113,6 +124,7 @@ class Picrandomizer {
       dontTouch,
       howManyImages,
       repetition,
+      resize,
       rotation
     ) {
       this.containerId = containerId.trim();
@@ -120,20 +132,55 @@ class Picrandomizer {
       this.dontTouch = dontTouch;
       this.howManyImages = howManyImages;
       this.repetition = repetition;
+      this.resize = resize;
       this.rotation = rotation;
     },
   };
 
   errors = {
     parent: undefined,
-
     errorState: false,
     errorMessages: [],
+    typesAllowed: ["cont", "disc"],
+    checkResize(resize) {
+      if (resize.neened) {
+        // check resize type
+        if (!resize.type) {
+          this.errorMessages.push(
+            "resize is requested but the resize type hasn't been specified"
+          );
+          this.errorState = true;
+          return;
+        }
+
+        if (this.typesAllowed.indexOf(resize.type) == -1) {
+          this.errorMessages.push(
+            `rotation type requested ${resize.type} is not allowed; allowed types are: ${this.typesAllowed}`
+          );
+          this.errorState = true;
+        }
+
+        // check resize range
+        if (!resize.range) {
+          this.errorMessages.push(`resize range hasn't been defined`);
+          this.errorState = true;
+          return;
+        }
+
+        if (resize.range.length > 2 && resize.type == "cont") {
+          this.errorMessages.push(
+            `if the resize type is continuous, only two limits has to be defined: min angle and max resize ratio in %`
+          );
+          this.errorState = true;
+          return;
+        }
+      }
+    },
 
     checkRotation(rotation) {
       if (rotation.neened) {
         // check rotation type
-        if (!rotation.rotationType) {
+        if (!rotation.type) {
           this.errorMessages.push(
             "rotation is requested but the rotation type hasn't been specified"
           );
@@ -141,25 +188,21 @@ class Picrandomizer {
           return;
         }
 
-        rotationTypesAllowed = ["cont", "disc"];
-        if (rotationTypesAllowed.indexOf(rotation.rotationType) == -1) {
+        if (this.typesAllowed.indexOf(rotation.type) == -1) {
           this.errorMessages.push(
-            `rotation type requested ${rotation.rotationType} is not allowed; allowed types are: ${rotationTypesAllowed}`
+            `rotation type requested ${rotation.type} is not allowed; allowed types are: ${this.typesAllowed}`
           );
           this.errorState = true;
         }
 
         // check rotation range
-        if (!rotation.rotationRange) {
+        if (!rotation.range) {
           this.errorMessages.push(`rotation range hasn't been defined`);
           this.errorState = true;
           return;
         }
 
-        if (
-          rotation.rotationRange.length > 2 &&
-          rotation.rotationType == "cont"
-        ) {
+        if (rotation.range.length > 2 && rotation.type == "cont") {
           this.errorMessages.push(
             `if the rotation type is continuous, only two limits has to be defined: min angle and max angle in deg`
           );
@@ -467,19 +510,32 @@ class Picrandomizer {
     },
 
     getRandomRotation(rotationConfig) {
-      if (rotationConfig.rotationType == "cont") {
-        return this.parent.utils.rnd(rotationConfig.rotationRange);
+      if (rotationConfig.type == "cont") {
+        return this.parent.utils.rnd(rotationConfig.range);
       }
 
-      return rotationConfig.rotationRange[
-        this.parent.utils.rnd(rotationConfig.rotationRange.length)
+      return rotationConfig.range[
+        this.parent.utils.rnd(rotationConfig.range.length)
       ];
     },
 
     getSize(img) {
+      let resizeConfig = this.parent.config.resize;
+      let resizeCoeffixient = 0;
+      if (resizeConfig.needed) {
+        if (resizeConfig.type == "cont") {
+          resizeCoeffixient = this.parent.utils.rnd(resizeConfig.range) / 100;
+        } else {
+          resizeCoeffixient =
+            resizeConfig.range[
+              this.parent.utils.rnd(resizeConfig.range.length)
+            ] / 100;
+        }
+      }
+
       return {
-        height: img.width,
-        width: img.height,
+        height: Math.floor(img.height + img.height * resizeCoeffixient),
+        width: Math.floor(img.width + img.width * resizeCoeffixient),
       };
     },
 
@@ -508,8 +564,12 @@ class Picrandomizer {
         position: absolute;
         top: ${img.imgConfig.corners[0].y}px;
         user-select: none;
-        z-index: 0;
-      `;
+        z-index: 0;`;
+
+        if (this.parent.config.resize) {
+          img.imgItself.style.height = `${img.imgConfig.height}px`;
+          img.imgItself.style.width = `${img.imgConfig.width}px`;
+        }
 
         if (this.parent.config.rotation) {
           img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
@@ -545,24 +605,26 @@ class Picrandomizer {
       });
 
       let rotationConfig = this.parent.config.rotation;
-      if (rotationConfig.needed) {
+      if (rotationConfig && rotationConfig.needed) {
         imgConfig.rotation = this.getRandomRotation(rotationConfig);
       }
     },
 
     setPositionNotTouchingAnyone(imgConfig) {
-      let tryCount = 0;
+      let attemptsCount = 0;
       let randomPosition = this.getRandomPosition(imgConfig);
       this.setPosition(imgConfig, randomPosition);
-      this.parent.geometry.setProjections(imgConfig);
 
-      while (this.touchesAnyone(imgConfig) && tryCount < 10) {
+      // TODO: control this logic, looks not working
+      while (this.touchesAnyone(imgConfig) && attemptsCount < 10) {
+        this.parent.geometry.setProjections(imgConfig);
+
         let randomPosition = this.getRandomPosition(imgConfig);
         this.setPosition(imgConfig, randomPosition);
         this.parent.geometry.setProjections(imgConfig);
-        tryCount++;
+        attemptsCount++;
       }
-      if (tryCount >= 10) {
+      if (attemptsCount >= 10) {
         imgConfig.isVisible = false;
         imgConfig.corners = [];
         imgConfig.rotation = undefined;
