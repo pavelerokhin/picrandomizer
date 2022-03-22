@@ -8,8 +8,13 @@
   <style>
     * {
       box-sizing: border-box;
+      font-family: Helvetica;
       margin: 0;
       padding: 0;
+    }
+
+    a {
+      text-decoration: none;
     }
 
     h1 {
@@ -76,6 +81,22 @@
       opacity: 0;
     }
 
+    .menu-item {
+      backdrop-filter: blur(10px);
+      border: 1px solid transparent;
+      color: white;
+      margin-bottom: 10px;
+      padding: 4px;
+      text-align: right;
+      font-size: 17px;
+    }
+
+    .menu-item.active {
+      background-color: rgba(255, 0, 0, 0.2);
+      border: 1px solid red;
+      color: red;
+    }
+
     .text-highlight {
       color: black !important;
       text-shadow: rgb(241, 241, 241) 1px 0 10px;
@@ -122,6 +143,17 @@
       text-shadow: 1px 1px 1px rgb(255, 0, 0);
     }
 
+    #menu {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      right: 10px;
+      top: 10px;
+      height: max-content;
+      width: max-content;
+      z-index: 1000;
+    }
+
     /* #background6 {
       background-color: rgb(234, 232, 232);
     }
@@ -132,6 +164,26 @@
     } */
   </style>
   <body>
+    <div id="menu">
+      <a class="menu-item active" href="#background1"
+        >Rotation, continious [0, 360) deg</a
+      >
+      <a class="menu-item" href="#background2">No rotation</a>
+      <a class="menu-item" href="#background2_1"
+        >Rotation, continious [45, 90) deg</a
+      >
+      <a class="menu-item" href="#background2_2"
+        >Rotation, discrete {0, 90, 180, 270} deg states</a
+      >
+      <a class="menu-item" href="#background3">Repetition of 2 images</a>
+      <a class="menu-item" href="#background4">Long screen</a>
+      <a class="menu-item" href="#background5"
+        >Size parameter, continious [-50, 50]%</a
+      >
+      <a class="menu-item" href="#background5_1"
+        >Size parameter, discrete {0, 50}% states</a
+      >
+    </div>
     <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation, continious [0, 360) deg</h1>
       <img
