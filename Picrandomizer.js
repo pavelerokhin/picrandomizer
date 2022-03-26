@@ -576,7 +576,7 @@ class Picrandomizer {
         }
 
         if (this.parent.config.rotation) {
-          img.imgItself.style.transform = `rotate(${img.imgConfig.rotation}deg)`;
+          img.imgItself.style.transform = `rotate(-${img.imgConfig.rotation}deg)`;
         }
       }
     },
