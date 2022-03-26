@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, showial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pic randomizer</title>
   </head>
   <style>
@@ -14,6 +14,7 @@
     }
 
     a {
+      cursor: pointer;
       text-decoration: none;
     }
 
@@ -81,7 +82,8 @@
       opacity: 0;
     }
 
-    .menu-item {
+    .menu-item,
+    .menu-item-active {
       backdrop-filter: blur(10px);
       border: 1px solid transparent;
       color: white;
@@ -91,7 +93,7 @@
       font-size: 17px;
     }
 
-    .menu-item.active {
+    .menu-item-active {
       background-color: rgba(255, 0, 0, 0.2);
       border: 1px solid red;
       color: red;
@@ -164,26 +166,7 @@
     } */
   </style>
   <body>
-    <div id="menu">
-      <a class="menu-item active" href="#background1"
-        >Rotation, continious [0, 360) deg</a
-      >
-      <a class="menu-item" href="#background2">No rotation</a>
-      <a class="menu-item" href="#background2_1"
-        >Rotation, continious [45, 90) deg</a
-      >
-      <a class="menu-item" href="#background2_2"
-        >Rotation, discrete {0, 90, 180, 270} deg states</a
-      >
-      <a class="menu-item" href="#background3">Repetition of 2 images</a>
-      <a class="menu-item" href="#background4">Long screen</a>
-      <a class="menu-item" href="#background5"
-        >Size parameter, continious [-50, 50]%</a
-      >
-      <a class="menu-item" href="#background5_1"
-        >Size parameter, discrete {0, 50}% states</a
-      >
-    </div>
+    <div id="menu"></div>
     <section id="background1" class="background">
       <h1>Pic randomizer tool. Rotation, continious [0, 360) deg</h1>
       <img
@@ -284,7 +267,9 @@
     </section>
   </body>
 
-  <script src="/scripts/Picrandomizer.js"></script>
+  <script src="vendor/Menu.js"></script>
+  <script src="Picrandomizer.js"></script>
+
   <script>
     let imagesUrls = [
       "/etc/gallery/1.png",
@@ -299,15 +284,10 @@
       "/etc/gallery/10.png",
       "/etc/gallery/11.png",
     ];
-
     let imagesUrls2 = ["/etc/gallery/1.png", "/etc/gallery/2.png"];
-
     let imagesUrls3 = ["/etc/gallery/6.png"];
-
     let imagesUrls4 = ["/etc/gallery/8.png"];
-
     let imagesUrls5 = ["/etc/gallery/earth_line.png"];
-
     let imagesUrls6 = ["/etc/gallery/earth.png"];
 
     let bgpics1 = new Picrandomizer({
@@ -315,7 +295,6 @@
       imagesUrls: imagesUrls,
       howManyImages: 4,
     });
-
     let bgpics2 = new Picrandomizer({
       containerId: "background2",
       imagesUrls: imagesUrls5,
@@ -323,7 +302,6 @@
       repetition: true,
       rotation: { needed: false },
     });
-
     let bgpics2_1 = new Picrandomizer({
       containerId: "background2_1",
       imagesUrls: imagesUrls5,
@@ -335,7 +313,6 @@
         range: [45, 90],
       },
     });
-
     let bgpics2_2 = new Picrandomizer({
       containerId: "background2_2",
       imagesUrls: imagesUrls5,
@@ -347,21 +324,18 @@
         range: [0, 90, 180, 270],
       },
     });
-
     let bgpics3 = new Picrandomizer({
       containerId: "background3",
       imagesUrls: imagesUrls2,
       howManyImages: 10,
       repetition: true,
     });
-
     let bgpics4 = new Picrandomizer({
       containerId: "background4",
       imagesUrls: imagesUrls,
       howManyImages: 50,
       repetition: true,
     });
-
     let bgpics5 = new Picrandomizer({
       containerId: "background5",
       imagesUrls: imagesUrls6,
@@ -374,7 +348,6 @@
       rotation: false,
       repetition: true,
     });
-
     let bgpics5_1 = new Picrandomizer({
       containerId: "background5_1",
       imagesUrls: imagesUrls6,
@@ -388,20 +361,46 @@
       repetition: true,
     });
 
-    // let bgpics5 = new Picrandomizer({
-    //   containerId: "background5",
+    // let bgpics6 = new Picrandomizer({
+    //   containerId: "background6",
     //   imagesUrls: imagesUrls3,
     //   dontTouch: true,
     //   howManyImages: 10,
     //   repetition: true,
     // });
 
-    // let bgpics6 = new Picrandomizer({
-    //   containerId: "background6",
+    // let bgpics7 = new Picrandomizer({
+    //   containerId: "background7",
     //   imagesUrls: imagesUrls4,
     //   howManyImages: 10,
     //   repetition: true,
     // });
+
+    let menu = new Menu({
+      menuContainerId: "menu",
+      items: [
+        { href: "#background1", caption: "Rotation, continious [0, 360) deg" },
+        { href: "#background2", caption: "No rotation" },
+        {
+          href: "#background2_1",
+          caption: "Rotation, continious [45, 90) deg",
+        },
+        {
+          href: "#background2_2",
+          caption: "Rotation, discrete {0, 90, 180, 270} deg states",
+        },
+        { href: "#background3", caption: "Repetition of 2 images" },
+        { href: "#background4", caption: "Long screen" },
+        {
+          href: "#background5",
+          caption: "Size parameter, continious [-50, 50]%",
+        },
+        {
+          href: "#background5_1",
+          caption: "Size parameter, discrete {0, 50}% states",
+        },
+      ],
+    });
 
     window.onload = () => {
       bgpics1.show();
@@ -412,6 +411,8 @@
       bgpics4.show();
       bgpics5.show();
       bgpics5_1.show();
+
+      menu.init();
     };
   </script>
 </html>
