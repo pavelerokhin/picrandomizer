@@ -6,6 +6,28 @@
     <title>pic randomizer</title>
   </head>
   <style>
+    /* width */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      background: #d1d1d1;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: #f4f4f4;
+      border: 1px solid rgb(23, 23, 23);
+      border-radius: 3px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgb(23, 23, 23);
+    }
+
     * {
       box-sizing: border-box;
       font-family: Helvetica;
@@ -46,6 +68,7 @@
       bottom: 10px;
       left: 10px;
       position: absolute;
+      z-index: 1000;
     }
 
     .background .sizes {
@@ -84,7 +107,6 @@
 
     .menu-item,
     .menu-item-active {
-      backdrop-filter: blur(10px);
       border: 1px solid transparent;
       color: white;
       margin-bottom: 10px;
@@ -104,40 +126,16 @@
       text-shadow: rgb(241, 241, 241) 1px 0 10px;
     }
 
-    /* #background1 {
-      background-color: rgb(28, 28, 28);
-    } */
-
-    /* #background2,
-    #background2_1,
-    #background2_2 {
-      background-color: rgb(90, 90, 90);
-      border: 1px solid red;
-    } */
-
     #background2 img,
     #background2_1 img,
     #background2_2 img {
       opacity: 0.7;
     }
 
-    /* #background3 {
-      background-color: rgb(124, 124, 124);
-    } */
-
-    /* #background4 {
-      background-color: rgb(176, 176, 176);
-    } */
     #background4 h1 {
       color: black;
       text-shadow: 0 1px 0 white;
     }
-
-    /* #background5,
-    #background5_1 {
-      background-color: rgb(203, 203, 203);
-      border: 1px solid red;
-    } */
 
     #background5 h1,
     #background5_1 h1 {
@@ -146,8 +144,10 @@
     }
 
     #menu {
+      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
+      padding: 2px;
       position: fixed;
       right: 10px;
       top: 10px;
