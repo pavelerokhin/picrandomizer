@@ -155,15 +155,6 @@
       width: max-content;
       z-index: 1000;
     }
-
-    /* #background6 {
-      background-color: rgb(234, 232, 232);
-    }
-
-    #background6 h1 {
-      color: rgb(107, 107, 107);
-      text-shadow: 1px 1px 1px rgb(255, 0, 0);
-    } */
   </style>
   <body>
     <div id="menu"></div>
@@ -271,18 +262,12 @@
   <script src="Picrandomizer.js"></script>
 
   <script>
-    let imagesUrls = [
-      "./etc/gallery/1.png",
-      "./etc/gallery/2.png",
-      "./etc/gallery/3.png",
-      "./etc/gallery/4.png",
-      "./etc/gallery/5.png",
-      "./etc/gallery/6.png",
-      "./etc/gallery/7.png",
-      "./etc/gallery/8.png",
-      "./etc/gallery/9.png",
-      "./etc/gallery/10.png",
-      "./etc/gallery/11.png",
+    let imagesUrls1 = [
+      "./etc/gallery/1-axis.png",
+      "./etc/gallery/2-axis.png",
+      "./etc/gallery/3-axis.png",
+      "./etc/gallery/4-axis.png",
+      "./etc/gallery/9-axis.png",
     ];
     let imagesUrls2 = ["./etc/gallery/1.png", "./etc/gallery/2.png"];
     let imagesUrls3 = ["./etc/gallery/6.png"];
@@ -292,7 +277,7 @@
 
     let bgpics1 = new Picrandomizer({
       containerId: "background1",
-      imagesUrls: imagesUrls,
+      imagesUrls: imagesUrls1,
       howManyImages: 4,
     });
     let bgpics2 = new Picrandomizer({
@@ -360,21 +345,6 @@
       rotation: false,
       repetition: true,
     });
-
-    // let bgpics6 = new Picrandomizer({
-    //   containerId: "background6",
-    //   imagesUrls: imagesUrls3,
-    //   dontTouch: true,
-    //   howManyImages: 10,
-    //   repetition: true,
-    // });
-
-    // let bgpics7 = new Picrandomizer({
-    //   containerId: "background7",
-    //   imagesUrls: imagesUrls4,
-    //   howManyImages: 10,
-    //   repetition: true,
-    // });
 
     let menu = new Menu({
       menuContainerId: "menu",
