@@ -39,6 +39,7 @@ class Menu {
   }
 
   _initItems(items) {
+    debugger;
     let itemsConfig = [];
 
     items.forEach((item, order) => {
@@ -85,14 +86,14 @@ class Menu {
       // page top
       activeId = this.items[0].id;
     } else if (
-      window.innerHeight + window.scrollY >=
+      Math.ceil(window.innerHeight + window.pageYOffset) >=
       document.body.offsetHeight
     ) {
       //page botom
       activeId = this.items[this.items.length - 1].id;
     } else {
       const upStandingSections = this.items.filter(
-        (i) => i.type == "internal" && window.pageYOffset >= i.sectionY
+        (i) => i.type == "internal" && window.pageYOffset + 1 >= i.sectionY
       );
       activeId = upStandingSections[upStandingSections.length - 1].id;
     }
